@@ -1,0 +1,15 @@
+{
+  "name": "My Utmost for His Highest · 주님은 나의 최고봉",
+  "short_name": "Utmost",
+  "description": "Oswald Chambers 매일 묵상 (영문·한글)",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#1d2433",
+  "theme_color": "#1d2433",
+  "icons": [
+    {"src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any"},
+    {"src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable"}
+  ]
+}

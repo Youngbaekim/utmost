@@ -1,0 +1,246 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Utmost · 매일 묵상</title>
+<meta name="theme-color" content="#1d2433">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<link rel="apple-touch-icon" href="icon-192.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#f7f4ee; --paper:#fffdf8; --ink:#25221d; --sub:#6b6458; --line:#e4ddcf;
+  --accent:#9a7426; --accent-bg:#f3ead6; --verse-bg:#f5efe2; --btn:#ffffff;
+  --fs:18px;
+  --en:'EB Garamond', Georgia, 'Times New Roman', serif;
+  --ko-serif:'Noto Serif KR', 'Nanum Myeongjo', serif;
+  --ko-sans:'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
+  --ko:var(--ko-serif);
+}
+:root[data-theme="dark"]{
+  --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
+  --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
+    --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38;
+  }
+}
+:root[data-kofont="sans"]{ --ko:var(--ko-sans); }
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink)}
+body{font-family:var(--ko-sans);-webkit-text-size-adjust:100%;padding-bottom:env(safe-area-inset-bottom)}
+button,select,input{font:inherit;color:inherit}
+
+/* ---------- top bar ---------- */
+header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
+  padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
+.bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:8px}
+.date-nav{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
+.icon-btn{border:1px solid var(--line);background:var(--btn);border-radius:10px;height:38px;min-width:38px;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;font-size:15px}
+.icon-btn:active{transform:scale(.96)}
+.date-label{flex:1;min-width:0;text-align:center;cursor:pointer;position:relative;line-height:1.15}
+.date-label .ko{font-weight:700;font-size:17px}
+.date-label .en{font-family:var(--en);font-size:14px;color:var(--sub)}
+.date-label input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.today-btn{color:var(--accent);font-weight:600}
+.tools{max-width:1100px;margin:8px auto 0;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--btn)}
+.seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer;font-size:14px;color:var(--sub)}
+.seg button.on{background:var(--accent);color:#fff;font-weight:600}
+:root[data-theme="dark"] .seg button.on{color:#1b1f27}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button.on{color:#1b1f27}}
+.mini{display:flex;gap:6px}
+
+/* ---------- content ---------- */
+main{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 20px 26px}
+.notice{font-size:14px;color:var(--sub);background:var(--accent-bg);border-radius:10px;padding:10px 12px;margin-bottom:14px}
+.cols{display:grid;gap:28px}
+.cols.two{grid-template-columns:1fr 1fr}
+@media (max-width:820px){ .cols.two{grid-template-columns:1fr} }
+.col-tag{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700;margin-bottom:6px}
+h1{margin:0 0 14px;line-height:1.3;font-weight:600}
+.en h1{font-family:var(--en);font-size:calc(var(--fs) * 1.35);letter-spacing:.02em}
+.ko h1{font-family:var(--ko);font-size:calc(var(--fs) * 1.3)}
+.verse{background:var(--verse-bg);border-left:3px solid var(--accent);border-radius:0 10px 10px 0;padding:12px 14px;margin:0 0 18px}
+.verse .t{font-style:italic}
+.ko .verse .t{font-style:normal}
+.verse .r{display:block;margin-top:6px;font-size:.85em;color:var(--sub);font-style:normal;text-align:right}
+.en{font-family:var(--en);font-size:calc(var(--fs) * 1.08);line-height:1.6}
+.ko{font-family:var(--ko);font-size:var(--fs);line-height:1.85;word-break:keep-all;overflow-wrap:break-word}
+.en p,.ko p{margin:0 0 1em;text-align:justify}
+.ko p{text-align:left}
+p b{color:var(--accent);font-weight:600}
+
+/* interleaved mode */
+.pair{padding:0 0 16px;margin-bottom:16px;border-bottom:1px dashed var(--line)}
+.pair:last-child{border-bottom:0;margin-bottom:0}
+.pair .ko p{margin-bottom:.7em}
+.pair .en p{color:var(--sub);margin-bottom:0;font-size:.95em}
+.head-pair h1{margin-bottom:4px}
+.head-pair .en h1{font-size:calc(var(--fs) * 1.1);color:var(--sub)}
+
+footer{max-width:1100px;margin:0 auto;padding:0 14px 30px;font-size:12px;color:var(--sub);line-height:1.6;text-align:center}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
+  border-radius:12px;padding:10px 14px;font-size:14px;display:none;gap:10px;align-items:center;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+.toast button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+@media (max-width:480px){
+  .seg button{padding:7px 10px}
+  .card{padding:18px 15px 22px;border-radius:12px}
+  main{padding:12px 10px 50px}
+  .en p{text-align:left}
+}
+</style>
+</head>
+<body>
+<header>
+  <div class="bar">
+    <div class="date-nav">
+      <button class="icon-btn" id="prev" aria-label="이전 날">‹</button>
+      <label class="date-label" title="날짜 선택">
+        <div class="ko" id="dKo">—</div>
+        <div class="en" id="dEn">—</div>
+        <input type="date" id="picker" aria-label="날짜 선택">
+      </label>
+      <button class="icon-btn" id="next" aria-label="다음 날">›</button>
+    </div>
+    <button class="icon-btn today-btn" id="today">오늘</button>
+  </div>
+  <div class="tools">
+    <div class="seg" id="mode">
+      <button data-v="ko">한글</button>
+      <button data-v="en">English</button>
+      <button data-v="both">대조</button>
+      <button data-v="pair">문단</button>
+    </div>
+    <div class="mini">
+      <button class="icon-btn" id="fsDown" aria-label="글자 작게">A−</button>
+      <button class="icon-btn" id="fsUp" aria-label="글자 크게">A+</button>
+      <button class="icon-btn" id="koFont" aria-label="한글 글꼴">명조</button>
+      <button class="icon-btn" id="theme" aria-label="테마">자동</button>
+    </div>
+  </div>
+</header>
+
+<main><div class="card" id="card">불러오는 중…</div></main>
+<footer>
+  Oswald Chambers, <i>My Utmost for His Highest</i> (1927 원문, 퍼블릭 도메인)<br>
+  한글: 자체 번역본(개인 묵상용) · 성경 인용은 개역한글 문체 기준 번역
+</footer>
+<div class="toast" id="toast"><span>새 버전이 있습니다</span><button id="reload">새로고침</button></div>
+
+<script>
+const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const $=id=>document.getElementById(id);
+const store={get(k,d){try{const v=localStorage.getItem('utmost.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
+             set(k,v){try{localStorage.setItem('utmost.'+k,JSON.stringify(v))}catch(e){}}};
+let EN=[], KO={}, idx=0;
+let mode=store.get('mode','ko'), fs=store.get('fs',18), theme=store.get('theme','auto'), kofont=store.get('kofont','serif');
+
+const pad=n=>String(n).padStart(2,'0');
+function todayId(){const d=new Date();return pad(d.getMonth()+1)+'-'+pad(d.getDate());}
+function idToIdx(id){const i=EN.findIndex(e=>e.id===id);return i<0?0:i;}
+
+function applyPrefs(){
+  const r=document.documentElement;
+  r.style.setProperty('--fs',fs+'px');
+  if(theme==='auto') r.removeAttribute('data-theme'); else r.setAttribute('data-theme',theme);
+  r.setAttribute('data-kofont',kofont);
+  $('koFont').textContent=kofont==='serif'?'명조':'고딕';
+  $('theme').textContent={auto:'자동',light:'밝게',dark:'어둡게'}[theme];
+  document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.v===mode));
+}
+
+function verseHTML(e){
+  if(!e.verse) return '';
+  return `<div class="verse"><span class="t">${e.verse}</span>${e.ref?`<span class="r">${e.ref}</span>`:''}</div>`;
+}
+function block(e,lang){
+  return `<div class="${lang}"><h1>${e.title}</h1>${verseHTML(e)}${e.paras.map(p=>`<p>${p}</p>`).join('')}</div>`;
+}
+const SMALL=new Set(['a','an','and','as','at','but','by','for','in','into','of','on','or','the','to','with','from','than','v.']);
+function titleCase(s){let first=true;return s.toLowerCase().replace(/[A-Za-z.'’]+/g,w=>{const r=(!first&&SMALL.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1);first=false;return r;}).replace(/\bi\b/g,'I');}
+
+function render(){
+  const en=EN[idx]; if(!en) return;
+  const [m,d]=en.id.split('-').map(Number);
+  $('dKo').textContent=`${m}월 ${d}일`;
+  $('dEn').textContent=`${MONTHS[m-1]} ${d}`;
+  const y=new Date().getFullYear(); $('picker').value=`${y}-${en.id}`;
+  const enD={...en,title:titleCase(en.title)};
+  const ko=KO[en.id];
+  let html='';
+  let eff=mode;
+  if(!ko && mode!=='en'){
+    html+=`<div class="notice">이 날짜의 한글 번역은 준비 중입니다. 영문으로 표시합니다.</div>`;
+    eff='en';
+  }
+  if(eff==='en') html+=block(enD,'en');
+  else if(eff==='ko') html+=block(ko,'ko');
+  else if(eff==='both'){
+    html+=`<div class="cols two"><div><div class="col-tag">KOREAN</div>${block(ko,'ko')}</div><div><div class="col-tag">ENGLISH</div>${block(enD,'en')}</div></div>`;
+  } else { // pair: paragraph by paragraph
+    html+=`<div class="pair head-pair"><div class="ko"><h1>${ko.title}</h1></div><div class="en"><h1>${enD.title}</h1></div></div>`;
+    html+=`<div class="pair"><div class="ko">${verseHTML(ko)}</div><div class="en">${verseHTML(enD)}</div></div>`;
+    en.paras.forEach((p,i)=>{
+      html+=`<div class="pair"><div class="ko"><p>${ko.paras[i]||''}</p></div><div class="en"><p>${p}</p></div></div>`;
+    });
+  }
+  $('card').innerHTML=html;
+  document.title=`${m}/${d} · ${ko&&mode!=='en'?ko.title:enD.title}`;
+}
+
+function go(i){idx=(i+EN.length)%EN.length;render();window.scrollTo({top:0});
+  history.replaceState(null,'','#'+EN[idx].id);}
+
+// events
+$('prev').onclick=()=>go(idx-1);
+$('next').onclick=()=>go(idx+1);
+$('today').onclick=()=>go(idToIdx(todayId()));
+$('picker').onchange=e=>{const v=e.target.value; if(v) go(idToIdx(v.slice(5)));};
+$('mode').onclick=e=>{const b=e.target.closest('button'); if(!b) return; mode=b.dataset.v; store.set('mode',mode); applyPrefs(); render();};
+$('fsDown').onclick=()=>{fs=Math.max(14,fs-1);store.set('fs',fs);applyPrefs();};
+$('fsUp').onclick=()=>{fs=Math.min(28,fs+1);store.set('fs',fs);applyPrefs();};
+$('koFont').onclick=()=>{kofont=kofont==='serif'?'sans':'serif';store.set('kofont',kofont);applyPrefs();};
+$('theme').onclick=()=>{theme={auto:'light',light:'dark',dark:'auto'}[theme];store.set('theme',theme);applyPrefs();};
+document.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return;
+  if(e.key==='ArrowLeft') go(idx-1); if(e.key==='ArrowRight') go(idx+1); });
+// swipe
+let sx=null,sy=null;
+document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchend',e=>{ if(sx===null) return;
+  const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)>80 && Math.abs(dx)>Math.abs(dy)*2) go(idx+(dx<0?1:-1)); sx=null;},{passive:true});
+// back to today when the app is reopened on a new day
+let lastDay=todayId();
+document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && todayId()!==lastDay){lastDay=todayId(); go(idToIdx(lastDay));} });
+
+applyPrefs();
+Promise.all([fetch('data/en.json').then(r=>r.json()), fetch('data/ko.json').then(r=>r.json()).catch(()=>({}))])
+ .then(([en,ko])=>{EN=en;KO=ko;
+   const h=location.hash.slice(1); idx=idToIdx(/^\d\d-\d\d$/.test(h)?h:todayId()); render();})
+ .catch(()=>{$('card').textContent='데이터를 불러오지 못했습니다. 네트워크 연결을 확인해 주십시오.';});
+
+// service worker + update prompt
+if('serviceWorker' in navigator && location.protocol!=='file:'){
+  navigator.serviceWorker.register('sw.js').then(reg=>{
+    const show=w=>{ $('toast').style.display='flex'; $('reload').onclick=()=>w.postMessage('skipWaiting'); };
+    if(reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
+    reg.addEventListener('updatefound',()=>{ const w=reg.installing;
+      w.addEventListener('statechange',()=>{ if(w.state==='installed' && navigator.serviceWorker.controller) show(w); }); });
+    setInterval(()=>reg.update(),60*60*1000);
+  });
+  let reloaded=false; const hadCtrl=!!navigator.serviceWorker.controller;  // first install: no reload
+  navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(hadCtrl && !reloaded){reloaded=true;location.reload();} });
+}
+</script>
+</body>
+</html>
