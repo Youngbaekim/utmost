@@ -1,5 +1,5 @@
 // Utmost service worker — VERSION is bumped by deploy.ps1 on every deploy.
-const VERSION = '20261030-000000';
+const VERSION = '20261030-141731';
 const SHELL = 'utmost-shell-' + VERSION;
 const FONTS = 'utmost-fonts-v1';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './data/en.json', './data/ko.json'];
@@ -9,7 +9,7 @@ self.addEventListener('install', e => {
 });
 self.addEventListener('activate', e => {
   e.waitUntil(caches.keys()
-    .then(keys => Promise.all(keys.filter(k => ![SHELL, FONTS].includes(k)).map(k => caches.delete(k))))
+    .then(keys => Promise.all(keys.filter(k => k.startsWith('utmost-') && ![SHELL, FONTS].includes(k)).map(k => caches.delete(k))))  // 같은 주소의 다른 앱 저장공간은 건드리지 않음
     .then(() => self.clients.claim()));
 });
 self.addEventListener('message', e => { if (e.data === 'skipWaiting') self.skipWaiting(); });

@@ -79,6 +79,8 @@ h1{margin:0 0 14px;line-height:1.3;font-weight:600}
 .en p,.ko p{margin:0 0 1em;text-align:justify}
 .ko p{text-align:left}
 p b{color:var(--accent);font-weight:600}
+.tnote{margin-top:18px;padding:10px 12px;border-top:1px solid var(--line);font-family:var(--ko-sans);font-size:.8em;line-height:1.6;color:var(--sub)}
+.tnote b{color:var(--accent);margin-right:4px}
 
 /* interleaved mode */
 .pair{padding:0 0 16px;margin-bottom:16px;border-bottom:1px dashed var(--line)}
@@ -133,7 +135,7 @@ footer{max-width:1100px;margin:0 auto;padding:0 14px 30px;font-size:12px;color:v
 <main><div class="card" id="card">불러오는 중…</div></main>
 <footer>
   Oswald Chambers, <i>My Utmost for His Highest</i> (1927 원문, 퍼블릭 도메인)<br>
-  한글: 자체 번역본(개인 묵상용) · 성경 인용은 개역한글 문체 기준 번역
+  한글: 자체 번역본 · 오늘의 말씀: 성경전서 개역개정판 © 대한성서공회 1998
 </footer>
 <div class="toast" id="toast"><span>새 버전이 있습니다</span><button id="reload">새로고침</button></div>
 
@@ -163,8 +165,9 @@ function verseHTML(e){
   if(!e.verse) return '';
   return `<div class="verse"><span class="t">${e.verse}</span>${e.ref?`<span class="r">${e.ref}</span>`:''}</div>`;
 }
+function noteHTML(e){ return e.note?`<div class="tnote"><b>역주</b> ${e.note}</div>`:''; }
 function block(e,lang){
-  return `<div class="${lang}"><h1>${e.title}</h1>${verseHTML(e)}${e.paras.map(p=>`<p>${p}</p>`).join('')}</div>`;
+  return `<div class="${lang}"><h1>${e.title}</h1>${verseHTML(e)}${e.paras.map(p=>`<p>${p}</p>`).join('')}${noteHTML(e)}</div>`;
 }
 const SMALL=new Set(['a','an','and','as','at','but','by','for','in','into','of','on','or','the','to','with','from','than','v.']);
 function titleCase(s){let first=true;return s.toLowerCase().replace(/[A-Za-z.'’]+/g,w=>{const r=(!first&&SMALL.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1);first=false;return r;}).replace(/\bi\b/g,'I');}
@@ -194,6 +197,8 @@ function render(){
       html+=`<div class="pair"><div class="ko"><p>${ko.paras[i]||''}</p></div><div class="en"><p>${p}</p></div></div>`;
     });
   }
+  if(eff==='pair' && ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`;
+  if(eff==='en' && ko && ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`;
   $('card').innerHTML=html;
   document.title=`${m}/${d} · ${ko&&mode!=='en'?ko.title:enD.title}`;
 }
