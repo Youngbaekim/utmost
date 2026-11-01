@@ -13,10 +13,13 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=Noto+Serif+KR:wght@400;600&display=swap" rel="stylesheet">
 <style>
+html{--mw:1100px;--gx:14px}
+html.memo-open{--mw:1400px}
+@media (max-width:480px){html{--gx:10px}}
 :root{
   --bg:#f7f4ee; --paper:#fffdf8; --ink:#25221d; --sub:#6b6458; --line:#e4ddcf;
   --accent:#9a7426; --accent-bg:#f3ead6; --verse-bg:#f5efe2; --btn:#ffffff; --rule:#e9dfcb;
-  --hl-y:rgba(253,224,71,.55); --hl-p:rgba(249,168,212,.55);
+  --hl-y:#fff176; --hl-p:#ffbfe0; --hl-ink:#1a1a1a;
   --fs:18px; --lh:calc(var(--fs) * 1.85);
   --en:'EB Garamond', Georgia, 'Times New Roman', serif;
   --ko-serif:'Noto Serif KR', 'Nanum Myeongjo', serif;
@@ -26,13 +29,13 @@
 :root[data-theme="dark"]{
   --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
   --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38; --rule:#2a3240;
-  --hl-y:rgba(250,204,21,.32); --hl-p:rgba(244,114,182,.32);
+  --hl-y:#ffe838; --hl-p:#ff92cc; --hl-ink:#111;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
     --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38; --rule:#2a3240;
-    --hl-y:rgba(250,204,21,.32); --hl-p:rgba(244,114,182,.32);
+    --hl-y:#ffe838; --hl-p:#ff92cc; --hl-ink:#111;
   }
 }
 :root[data-kofont="sans"]{ --ko:var(--ko-sans); }
@@ -43,8 +46,8 @@ button,select,input{font:inherit;color:inherit}
 
 /* ---------- top bar ---------- */
 header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
-  padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
-.bar{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:6px}
+  padding:calc(8px + env(safe-area-inset-top)) var(--gx) 8px}
+.bar{max-width:calc(var(--mw) - 2 * var(--gx));margin:0 auto;display:flex;align-items:center;gap:6px}
 .date-nav{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
 .icon-btn{border:1px solid var(--line);background:var(--btn);border-radius:10px;height:38px;min-width:38px;
   display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;font-size:15px;white-space:nowrap}
@@ -54,14 +57,14 @@ header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px s
 .date-label .ko{font-weight:700;font-size:17px;display:block}
 .date-label .en{font-family:var(--en);font-size:14px;color:var(--sub);display:block}
 .today-btn{color:var(--accent);font-weight:600}
-.tools{max-width:1400px;margin:8px auto 0;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.tools{max-width:calc(var(--mw) - 2 * var(--gx));margin:8px auto 0;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
 .left-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--btn)}
 .seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer;font-size:14px;color:var(--sub)}
 .seg button.on{background:var(--accent);color:#fff;font-weight:600}
 :root[data-theme="dark"] .seg button.on,:root[data-theme="dark"] .icon-btn.on{color:#1b1f27}
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button.on,:root:not([data-theme="light"]) .icon-btn.on{color:#1b1f27}}
-.mini{display:flex;gap:6px}
+.mini{display:flex;gap:6px;margin-left:auto}
 
 /* login-only elements */
 .auth-only{display:none !important}
@@ -77,8 +80,7 @@ body.auth .auth-only{display:inline-flex !important}
 .dot.on{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ---------- content ---------- */
-main{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
-main.wide{max-width:1400px}
+main{max-width:var(--mw);margin:0 auto;padding:18px var(--gx) 60px}
 #wrap{--split:50%}
 .card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 20px 26px;container-type:inline-size}
 .divider{display:none}
@@ -125,8 +127,11 @@ p b{color:var(--accent);font-weight:600}
 .tnote b{color:var(--accent);margin-right:4px}
 
 /* highlights (visible only when logged in) */
-body.auth .w[data-hl="y"],body.auth .s[data-hl="y"]{background:var(--hl-y)}
-body.auth .w[data-hl="p"],body.auth .s[data-hl="p"]{background:var(--hl-p)}
+body.auth .w[data-hl="y"],body.auth .s[data-hl="y"]{background:var(--hl-y);color:var(--hl-ink)}
+body.auth .w[data-hl="p"],body.auth .s[data-hl="p"]{background:var(--hl-p);color:var(--hl-ink)}
+body.auth .w[data-hl]{-webkit-box-decoration-break:clone;box-decoration-break:clone}
+/* memo highlight: stored as a fixed marker colour, shown with the theme's highlighter colour */
+.note-pad [style*="background-color: rgb(255, 241, 118)"],.note-pad [style*="background-color: rgba(253, 224, 71"]{background-color:var(--hl-y) !important;color:var(--hl-ink)}
 body.tool-on #card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 body.tool-on #card .w{cursor:pointer}
 
@@ -138,7 +143,7 @@ body.tool-on #card .w{cursor:pointer}
 .head-pair h1{margin-bottom:4px}
 .head-pair .en h1{font-size:calc(var(--fs) * 1.1);color:var(--sub)}
 
-footer{max-width:1100px;margin:0 auto;padding:0 14px 30px;font-size:12px;color:var(--sub);line-height:1.6;text-align:center}
+footer{max-width:var(--mw);margin:0 auto;padding:0 var(--gx) 30px;font-size:12px;color:var(--sub);line-height:1.6;text-align:center}
 body.memo-open footer{display:none}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
   border-radius:12px;padding:10px 14px;font-size:14px;display:none;gap:10px;align-items:center;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.25)}
@@ -182,7 +187,7 @@ body.memo-open footer{display:none}
 @media (max-width:480px){
   .seg button{padding:7px 9px}
   .card{padding:18px 15px 22px;border-radius:12px}
-  main{padding:12px 10px 50px}
+  main{padding-top:12px;padding-bottom:50px}
   .en p{text-align:left}
   .icon-btn{padding:0 8px;font-size:14px}
   #wrap.split .card{padding:14px 12px}
@@ -277,7 +282,7 @@ const store={get(k,d){try{const v=localStorage.getItem('utmost.'+k);return v===n
              set(k,v){try{localStorage.setItem('utmost.'+k,JSON.stringify(v))}catch(e){}},
              del(k){try{localStorage.removeItem('utmost.'+k)}catch(e){}}};
 let EN=[], KO={}, idx=0;
-let mode=store.get('mode','ko'), fs=store.get('fs',18), theme=store.get('theme','auto'), kofont=store.get('kofont','serif');
+let mode=store.get('mode','ko'), fs=store.get('fs',17), theme=store.get('theme','auto'), kofont=store.get('kofont','serif');
 let auth=store.get('auth',false), tool=null, memoOpen=false, split=store.get('split',50);
 let HL=store.get('hl',{}), MT=store.get('mt',{}), MB=store.get('mb',{}), PEND=store.get('pend',[]);
 let cloud=null;   // sync.js (자동 동기화) — 로그인 상태에서 불러옴
@@ -478,23 +483,44 @@ $('dateBtn').onclick=openCal;
 $('yearGrid').onclick=e=>{ const b=e.target.closest('button.d'); if(!b) return; closeModal('calModal'); go(idToIdx(b.dataset.id)); };
 
 /* ---------- login ---------- */
-async function sha(s){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+/* synchronous SHA-256 (the Google pop-up must open inside the same click) */
+function sha256(str){
+  const K=[],H=[];let n=2,c=0;
+  const isP=x=>{for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true;};
+  while(c<64){if(isP(n)){if(c<8)H[c]=(Math.pow(n,1/2)*4294967296)|0;K[c++]=(Math.pow(n,1/3)*4294967296)|0;}n++;}
+  const b=[...new TextEncoder().encode(str)],l=b.length*8;b.push(0x80);while(b.length%64!==56)b.push(0);
+  for(let i=7;i>=0;i--)b.push(i>3?0:(l>>>(i*8))&255);
+  const r=(x,y)=>(x>>>y)|(x<<(32-y));let h=H.slice();
+  for(let o=0;o<b.length;o+=64){const w=[];for(let i=0;i<16;i++)w[i]=(b[o+i*4]<<24)|(b[o+i*4+1]<<16)|(b[o+i*4+2]<<8)|b[o+i*4+3];
+    for(let i=16;i<64;i++){const s0=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3),s1=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
+    let [a,bb,cc,d,e,f,g,hh]=h;
+    for(let i=0;i<64;i++){const t1=(hh+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K[i]+w[i])|0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&bb)^(a&cc)^(bb&cc)))|0;
+      hh=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0;}
+    h=[a,bb,cc,d,e,f,g,hh].map((v,i)=>(v+h[i])|0);}
+  return h.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');
+}
 function applyAuth(){
   document.body.classList.toggle('auth',auth);
   $('auth').textContent=auth?'로그아웃':'로그인';
   if(!auth){ setTool(null); setMemo(false); }
-  else loadCloud();
   measureHeader();
 }
 $('auth').onclick=()=>{
   if(auth){ flushMemo(); auth=false; store.set('auth',false); applyAuth(); if(cloud) cloud.disconnect(); return; }
+  loadCloud();
   $('pw').value=''; $('pwErr').textContent=''; openModal('loginModal'); setTimeout(()=>$('pw').focus(),50);
 };
-async function tryLogin(){
-  let ok=false; try{ ok=(await sha($('pw').value))===PW_HASH; }catch(e){ $('pwErr').textContent='이 환경에서는 로그인할 수 없습니다(https 필요).'; return; }
-  if(ok){ auth=true; store.set('auth',true); closeModal('loginModal'); applyAuth(); }
-  else { $('pwErr').textContent='비밀번호가 맞지 않습니다.'; $('pw').select(); }
+function tryLogin(){
+  if(sha256($('pw').value)!==PW_HASH){ $('pwErr').textContent='비밀번호가 맞지 않습니다.'; $('pw').select(); return; }
+  if(!cloud){ $('pwErr').textContent='준비 중입니다. 잠시 후 다시 눌러 주십시오.'; loadCloud(); return; }
+  $('pwErr').textContent='Google 계정을 확인하고 있습니다…';
+  cloud.login().then(r=>{
+    if(r.ok) finishLogin();
+    else if(r.redirect) $('pwErr').textContent='Google 로그인 페이지로 이동합니다…';
+    else $('pwErr').textContent=r.error||'Google 로그인이 취소되었습니다.';
+  });
 }
+function finishLogin(){ store.del('redirectLogin'); auth=true; store.set('auth',true); closeModal('loginModal'); applyAuth(); }
 $('pwOk').onclick=tryLogin;
 $('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
 
@@ -543,17 +569,14 @@ window.addEventListener('resize',measureHeader);
 function setMemo(open){
   if(!open) flushMemo();
   memoOpen=open;
-  $('wrap').classList.toggle('split',open); $('main').classList.toggle('wide',open);
-  document.body.classList.toggle('memo-open',open);
+  $('wrap').classList.toggle('split',open);
+  document.body.classList.toggle('memo-open',open); document.documentElement.classList.toggle('memo-open',open);
   $('memoBtn').classList.toggle('on',open);
   $('wrap').style.setProperty('--split',split+'%');
   measureHeader();
   if(open){ loadMemo(); window.scrollTo({top:0}); }
 }
-$('memoBtn').onclick=()=>{
-  const open=!memoOpen; setMemo(open);
-  if(open){ if(cloud) cloud.connect(); else loadCloud().then(m=>m.connect()); }   // 처음 한 번 Google 로그인
-};
+$('memoBtn').onclick=()=>setMemo(!memoOpen);
 function loadMemo(){
   memoId=curId(); padEl.innerHTML=store.get('memo.'+memoId,'');
   const [m,d]=memoId.split('-').map(Number); $('memoDate').textContent=`${m}월 ${d}일 메모`;
@@ -579,7 +602,7 @@ function inMark(){
 $('mkBtn').onclick=()=>{
   padEl.focus(); const on=inMark();
   document.execCommand('styleWithCSS',false,true);
-  document.execCommand('hiliteColor',false,on?'transparent':'rgba(253, 224, 71, 0.6)');
+  document.execCommand('hiliteColor',false,on?'transparent':'rgb(255, 241, 118)');
   document.execCommand('styleWithCSS',false,false);
   syncBar(); flushSoon();
 };
@@ -609,20 +632,25 @@ function showCloud(st){
   if(st.error){ b.classList.add('err'); el.textContent='⚠ '+st.error; el.title=''; }
   else if(st.email){ b.classList.add(st.busy?'busy':'ok'); el.textContent=st.busy?'동기화 중…':'동기화됨'+(st.last?' '+fmtTime(st.last):''); el.title=st.email; }
   else if(st.connecting){ el.textContent='Google 로그인 중…'; }
-  else { el.textContent=st.ready?'이 기기에만 저장 중':''; }
+  else { el.textContent=''; }
   b.title=st.email?`메모 · ${st.email} 동기화`:'메모';
 }
 let cloudLoading=null;
 function loadCloud(){
   if(cloud) return Promise.resolve(cloud);
-  if(!cloudLoading) cloudLoading=import('./sync.js').then(m=>{ cloud=m; m.onState(showCloud); return m; })
+  if(!cloudLoading) cloudLoading=import('./sync.js').then(m=>{ cloud=m; m.onState(st=>{ showCloud(st); reconcile(st); }); return m; })
     .catch(e=>{ cloudLoading=null; showCloud({error:'동기화 기능을 불러오지 못했습니다(네트워크 확인).'}); throw e; });
   return cloudLoading;
 }
-$('syncSt').onclick=()=>{ if(cloud&&!cloud.isOn()) cloud.connect(); };
+/* 로그인 상태와 Google 계정 상태를 맞춤 */
+function reconcile(st){
+  if(!st.ready) return;
+  if(st.email && store.get('redirectLogin',false)) finishLogin();          // 페이지 이동 방식 로그인에서 돌아옴
+  else if(auth && !st.email){ auth=false; store.set('auth',false); applyAuth(); }   // Google 연결이 끊긴 경우 다시 로그인
+}
 
 /* ---------- boot ---------- */
-applyPrefs(); applyAuth();
+applyPrefs(); applyAuth(); loadCloud().catch(()=>{});
 Promise.all([fetch('data/en.json').then(r=>r.json()), fetch('data/ko.json').then(r=>r.json()).catch(()=>({}))])
  .then(([en,ko])=>{EN=en;KO=ko;
    const h=location.hash.slice(1); idx=idToIdx(/^\d\d-\d\d$/.test(h)?h:todayId()); render();})

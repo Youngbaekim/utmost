@@ -13,7 +13,7 @@ import {
   getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, getRedirectResult,
   onAuthStateChanged, signOut,
 } from './vendor/firebase-auth.js';
-import { getFirestore, collection, doc, onSnapshot, runTransaction } from './vendor/firebase-firestore.js';
+import { getFirestore, collection, doc, getDoc, onSnapshot, runTransaction } from './vendor/firebase-firestore.js';
 
 // 프로젝트 식별 정보(비밀번호 아님). 데이터 보호는 Firestore 보안 규칙이 담당.
 const firebaseConfig = {
@@ -144,6 +144,35 @@ onAuthStateChanged(auth, (u) => {
   if (u) subscribe(); else if (unsub) { unsub(); unsub = null; }
   emit();
 });
+/** 앱 로그인: Google 계정 로그인 + 허용 계정인지 확인 → {ok} | {ok:false,error} | {redirect:true} */
+export async function login() {
+  const p = new GoogleAuthProvider();
+  p.setCustomParameters({ prompt: 'select_account' });
+  state.error = null;
+  if (!user) {
+    state.connecting = true; emit();
+    try { await signInWithPopup(auth, p); }
+    catch (e) {
+      state.connecting = false; emit();
+      const fallback = ['auth/popup-blocked', 'auth/operation-not-supported-in-environment', 'auth/web-storage-unsupported'];
+      if (fallback.includes(e.code)) {
+        try { localStorage.setItem('utmost.redirectLogin', 'true'); } catch (_) {}
+        signInWithRedirect(auth, p); return { redirect: true };
+      }
+      if (e.code === 'auth/popup-closed-by-user' || e.code === 'auth/cancelled-popup-request') return { ok: false };
+      return { ok: false, error: msg(e) };
+    }
+  }
+  const u = auth.currentUser;
+  try { await getDoc(doc(db, 'users', u.uid, 'utmost', '01-01')); }
+  catch (e) {
+    if ((e.code || '').includes('permission-denied')) {
+      await disconnect();
+      return { ok: false, error: `${u.email} 계정은 사용할 수 없습니다(허용 목록 밖).` };
+    }
+  }
+  return { ok: true, email: u.email };
+}
 export async function connect() {
   if (user || state.connecting) return;
   const p = new GoogleAuthProvider();
