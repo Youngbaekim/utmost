@@ -78,6 +78,38 @@ body.auth .auth-only{display:inline-flex !important}
 .dot.x{border-style:dashed;border-color:var(--sub);
   background:linear-gradient(135deg,transparent 46%,var(--sub) 47%,var(--sub) 53%,transparent 54%)}
 .dot.on{outline:2px solid var(--accent);outline-offset:2px}
+#auth.in{color:var(--accent)}
+/* compact (phone) pickers */
+.dd{position:relative}
+.compact{display:none !important}
+.glyph{font-weight:700;font-size:14px;letter-spacing:-.02em}
+.dd-menu{position:absolute;top:calc(100% + 6px);left:0;z-index:30;background:var(--paper);border:1px solid var(--line);border-radius:12px;
+  box-shadow:0 8px 24px rgba(0,0,0,.2);padding:6px;display:none;min-width:140px}
+.dd.open .dd-menu{display:block}
+.dd-menu .opt{display:flex;width:100%;border:0;background:transparent;padding:10px 12px;border-radius:8px;font-size:15px;cursor:pointer;justify-content:space-between;align-items:center;color:var(--ink)}
+.dd-menu .opt.on{background:var(--accent-bg);color:var(--accent);font-weight:600}
+.dd-menu.dots{min-width:0;padding:10px 12px;gap:14px}
+.dd.open .dd-menu.dots{display:flex}
+#hlBtn{border-bottom-width:4px}
+#hlBtn.t-y{border-bottom-color:#fde047} #hlBtn.t-p{border-bottom-color:#f9a8d4} #hlBtn.t-x{border-bottom-color:var(--sub);border-bottom-style:dashed}
+#hlBtn.t-y,#hlBtn.t-p,#hlBtn.t-x{color:var(--accent)}
+body.auth #hlPick{display:none !important}
+@media (max-width:600px){
+  #mode{display:none}
+  body.auth #hlTools{display:none !important}
+  #modePick{display:inline-flex !important}
+  body.auth #hlPick{display:inline-flex !important}
+  .left-tools{gap:6px}
+}
+/* PC: transparent width handles on both sides of the reading frame */
+#wrap{position:relative}
+.wh{display:none}
+@media (min-width:821px) and (hover:hover){
+  .wh{display:block;position:absolute;top:0;bottom:0;width:14px;cursor:ew-resize;z-index:5;touch-action:none}
+  .wh.l{left:-14px} .wh.r{right:-14px}
+  .wh:hover,body.wdrag .wh{background:linear-gradient(to right,transparent 5px,var(--line) 5px,var(--line) 9px,transparent 9px)}
+  body.wdrag{cursor:ew-resize;user-select:none;-webkit-user-select:none}
+}
 
 /* ---------- content ---------- */
 main{max-width:var(--mw);margin:0 auto;padding:18px var(--gx) 60px}
@@ -207,11 +239,23 @@ body.memo-open footer{display:none}
       </button>
       <button class="icon-btn" id="next" aria-label="다음 날">›</button>
     </div>
-    <button class="icon-btn" id="auth">로그인</button>
+    <button class="icon-btn" id="auth" title="로그인" aria-label="로그인"></button>
     <button class="icon-btn auth-only" id="memoBtn">메모</button>
   </div>
   <div class="tools">
     <div class="left-tools">
+      <div class="dd compact" id="modePick">
+        <button class="icon-btn" id="modeBtn" title="보기 방식" aria-label="보기 방식"><span class="glyph">가A</span></button>
+        <div class="dd-menu" id="modeMenu"></div>
+      </div>
+      <div class="dd compact auth-only" id="hlPick">
+        <button class="icon-btn" id="hlBtn" title="형광펜" aria-label="형광펜"><svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 11l-6 6v3h9l3-3"/><path d="M22 12l-4.6 4.6a2 2 0 0 1-2.8 0l-5.2-5.2a2 2 0 0 1 0-2.8L14 4"/></svg></button>
+        <div class="dd-menu dots" id="hlMenu">
+          <button class="dot y" data-t="y" aria-label="노랑 형광펜"></button>
+          <button class="dot p" data-t="p" aria-label="분홍 형광펜"></button>
+          <button class="dot x" data-t="x" aria-label="지우개"></button>
+        </div>
+      </div>
       <div class="seg" id="mode">
         <button data-v="ko">한글</button>
         <button data-v="en">English</button>
@@ -235,6 +279,8 @@ body.memo-open footer{display:none}
 
 <main id="main">
   <div id="wrap">
+    <div class="wh l" data-side="l" title="본문 폭 조절 (두 번 클릭: 기본 폭)"></div>
+    <div class="wh r" data-side="r" title="본문 폭 조절 (두 번 클릭: 기본 폭)"></div>
     <div class="card" id="card">불러오는 중…</div>
     <div class="divider" id="divider" aria-label="크기 조절"></div>
     <section class="memo" id="memo">
@@ -325,6 +371,9 @@ function applyPrefs(){
   $('koFont').textContent=kofont==='serif'?'명조':'고딕';
   $('theme').textContent={auto:'자동',light:'밝게',dark:'어둡게'}[theme];
   document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.v===mode));
+  const MODES=[['ko','한글'],['en','English'],['both','대조'],['pair','문단']];
+  $('modeMenu').innerHTML=MODES.map(([v,l])=>`<button class="opt${v===mode?' on':''}" data-v="${v}">${l}${v===mode?'<span>✓</span>':''}</button>`).join('');
+  $('modeBtn').title='보기 방식: '+MODES.find(m=>m[0]===mode)[1];
   measureHeader();
 }
 
@@ -426,7 +475,13 @@ function go(i){
 $('prev').onclick=()=>go(idx-1);
 $('next').onclick=()=>go(idx+1);
 $('today').onclick=()=>go(idToIdx(todayId()));
-$('mode').onclick=e=>{const b=e.target.closest('button'); if(!b) return; mode=b.dataset.v; store.set('mode',mode); applyPrefs(); render();};
+function setMode(v){ mode=v; store.set('mode',mode); applyPrefs(); render(); }
+$('mode').onclick=e=>{const b=e.target.closest('button'); if(b) setMode(b.dataset.v);};
+/* phone dropdowns */
+function closeDD(){ document.querySelectorAll('.dd.open').forEach(d=>d.classList.remove('open')); }
+['modePick','hlPick'].forEach(id=>{ $(id).querySelector('.icon-btn').onclick=e=>{ e.stopPropagation(); const o=!$(id).classList.contains('open'); closeDD(); $(id).classList.toggle('open',o); }; });
+$('modeMenu').onclick=e=>{ const b=e.target.closest('.opt'); if(!b) return; closeDD(); setMode(b.dataset.v); };
+document.addEventListener('click',e=>{ if(!e.target.closest('.dd')) closeDD(); });
 $('fsDown').onclick=()=>{fs=Math.max(14,fs-1);store.set('fs',fs);applyPrefs();};
 $('fsUp').onclick=()=>{fs=Math.min(28,fs+1);store.set('fs',fs);applyPrefs();};
 $('koFont').onclick=()=>{kofont=kofont==='serif'?'sans':'serif';store.set('kofont',kofont);applyPrefs();};
@@ -501,7 +556,8 @@ function sha256(str){
 }
 function applyAuth(){
   document.body.classList.toggle('auth',auth);
-  $('auth').textContent=auth?'로그아웃':'로그인';
+  $('auth').innerHTML=auth?'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>':'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>';
+  $('auth').title=auth?'로그아웃':'로그인'; $('auth').setAttribute('aria-label',$('auth').title); $('auth').classList.toggle('in',auth);
   if(!auth){ setTool(null); setMemo(false); }
   measureHeader();
 }
@@ -527,10 +583,12 @@ $('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
 /* ---------- highlighter ---------- */
 function setTool(t){
   tool=(t && tool!==t)?t:null;
-  document.querySelectorAll('#hlTools .dot').forEach(d=>d.classList.toggle('on',d.dataset.t===tool));
+  document.querySelectorAll('.dot[data-t]').forEach(d=>d.classList.toggle('on',d.dataset.t===tool));
+  $('hlBtn').classList.remove('t-y','t-p','t-x'); if(tool) $('hlBtn').classList.add('t-'+tool);
   document.body.classList.toggle('tool-on',!!tool);
 }
 $('hlTools').onclick=e=>{ const d=e.target.closest('.dot'); if(d) setTool(d.dataset.t); };
+$('hlMenu').onclick=e=>{ const d=e.target.closest('.dot'); if(d){ setTool(d.dataset.t); closeDD(); } };
 const card=$('card');
 let painting=null;
 card.addEventListener('mousedown',e=>{
@@ -565,7 +623,31 @@ document.addEventListener('touchend',e=>{
 /* ---------- memo ---------- */
 const padEl=$('pad'); let memoId=null, memoTimer=null;
 function measureHeader(){ document.documentElement.style.setProperty('--hh',$('hdr').offsetHeight+'px'); }
-window.addEventListener('resize',measureHeader);
+window.addEventListener('resize',()=>{ applyWidth(); });
+/* PC: drag either side handle to narrow/widen the frame symmetrically (header follows via --mw) */
+const isDesk=()=>matchMedia('(min-width:821px) and (hover:hover)').matches;
+const wKey=()=>memoOpen?'mwMemo':'mw';
+function applyWidth(){
+  const v=store.get(wKey(),0), r=document.documentElement.style;
+  if(v && isDesk()) r.setProperty('--mw',Math.min(v,innerWidth)+'px'); else r.removeProperty('--mw');
+  measureHeader();
+}
+let wDrag=null;
+document.querySelectorAll('.wh').forEach(h=>{
+  h.addEventListener('pointerdown',e=>{
+    const rc=$('wrap').getBoundingClientRect();
+    wDrag={cx:rc.left+rc.width/2, gx:parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gx'))||14, mw:0};
+    h.setPointerCapture(e.pointerId); document.body.classList.add('wdrag'); e.preventDefault();
+  });
+  h.addEventListener('pointermove',e=>{
+    if(!wDrag) return;
+    const mw=Math.round(Math.max(560,Math.min(innerWidth,2*Math.abs(e.clientX-wDrag.cx)+2*wDrag.gx)));
+    wDrag.mw=mw; document.documentElement.style.setProperty('--mw',mw+'px'); measureHeader();
+  });
+  const end=()=>{ if(!wDrag) return; if(wDrag.mw) store.set(wKey(),wDrag.mw); wDrag=null; document.body.classList.remove('wdrag'); };
+  h.addEventListener('pointerup',end); h.addEventListener('pointercancel',end);
+  h.addEventListener('dblclick',()=>{ store.del(wKey()); applyWidth(); });
+});
 function setMemo(open){
   if(!open) flushMemo();
   memoOpen=open;
@@ -573,7 +655,7 @@ function setMemo(open){
   document.body.classList.toggle('memo-open',open); document.documentElement.classList.toggle('memo-open',open);
   $('memoBtn').classList.toggle('on',open);
   $('wrap').style.setProperty('--split',split+'%');
-  measureHeader();
+  applyWidth();
   if(open){ loadMemo(); window.scrollTo({top:0}); }
 }
 $('memoBtn').onclick=()=>setMemo(!memoOpen);
@@ -650,7 +732,7 @@ function reconcile(st){
 }
 
 /* ---------- boot ---------- */
-applyPrefs(); applyAuth(); loadCloud().catch(()=>{});
+applyPrefs(); applyAuth(); applyWidth(); loadCloud().catch(()=>{});
 Promise.all([fetch('data/en.json').then(r=>r.json()), fetch('data/ko.json').then(r=>r.json()).catch(()=>({}))])
  .then(([en,ko])=>{EN=en;KO=ko;
    const h=location.hash.slice(1); idx=idToIdx(/^\d\d-\d\d$/.test(h)?h:todayId()); render();})
