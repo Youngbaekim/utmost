@@ -15,8 +15,9 @@
 <style>
 :root{
   --bg:#f7f4ee; --paper:#fffdf8; --ink:#25221d; --sub:#6b6458; --line:#e4ddcf;
-  --accent:#9a7426; --accent-bg:#f3ead6; --verse-bg:#f5efe2; --btn:#ffffff;
-  --fs:18px;
+  --accent:#9a7426; --accent-bg:#f3ead6; --verse-bg:#f5efe2; --btn:#ffffff; --rule:#e9dfcb;
+  --hl-y:rgba(253,224,71,.55); --hl-p:rgba(249,168,212,.55);
+  --fs:18px; --lh:calc(var(--fs) * 1.85);
   --en:'EB Garamond', Georgia, 'Times New Roman', serif;
   --ko-serif:'Noto Serif KR', 'Nanum Myeongjo', serif;
   --ko-sans:'Pretendard', -apple-system, 'Malgun Gothic', sans-serif;
@@ -24,12 +25,14 @@
 }
 :root[data-theme="dark"]{
   --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
-  --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38;
+  --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38; --rule:#2a3240;
+  --hl-y:rgba(250,204,21,.32); --hl-p:rgba(244,114,182,.32);
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     --bg:#141922; --paper:#1b212c; --ink:#e7e2d8; --sub:#9c968a; --line:#2c3442;
-    --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38;
+    --accent:#d9b45a; --accent-bg:#2a2a22; --verse-bg:#222a36; --btn:#232b38; --rule:#2a3240;
+    --hl-y:rgba(250,204,21,.32); --hl-p:rgba(244,114,182,.32);
   }
 }
 :root[data-kofont="sans"]{ --ko:var(--ko-sans); }
@@ -41,31 +44,70 @@ button,select,input{font:inherit;color:inherit}
 /* ---------- top bar ---------- */
 header{position:sticky;top:0;z-index:10;background:var(--bg);border-bottom:1px solid var(--line);
   padding:calc(8px + env(safe-area-inset-top)) 12px 8px}
-.bar{max-width:1100px;margin:0 auto;display:flex;align-items:center;gap:8px}
+.bar{max-width:1400px;margin:0 auto;display:flex;align-items:center;gap:6px}
 .date-nav{display:flex;align-items:center;gap:4px;flex:1;min-width:0}
 .icon-btn{border:1px solid var(--line);background:var(--btn);border-radius:10px;height:38px;min-width:38px;
-  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;font-size:15px}
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;padding:0 10px;font-size:15px;white-space:nowrap}
 .icon-btn:active{transform:scale(.96)}
-.date-label{flex:1;min-width:0;text-align:center;cursor:pointer;position:relative;line-height:1.15}
-.date-label .ko{font-weight:700;font-size:17px}
-.date-label .en{font-family:var(--en);font-size:14px;color:var(--sub)}
-.date-label input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%}
+.icon-btn.on{background:var(--accent);border-color:var(--accent);color:#fff}
+.date-label{flex:1;min-width:0;text-align:center;cursor:pointer;line-height:1.15;border:0;background:transparent;padding:2px 0}
+.date-label .ko{font-weight:700;font-size:17px;display:block}
+.date-label .en{font-family:var(--en);font-size:14px;color:var(--sub);display:block}
 .today-btn{color:var(--accent);font-weight:600}
-.tools{max-width:1100px;margin:8px auto 0;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.tools{max-width:1400px;margin:8px auto 0;display:flex;gap:8px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.left-tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 .seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--btn)}
 .seg button{border:0;background:transparent;padding:7px 12px;cursor:pointer;font-size:14px;color:var(--sub)}
 .seg button.on{background:var(--accent);color:#fff;font-weight:600}
-:root[data-theme="dark"] .seg button.on{color:#1b1f27}
-@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button.on{color:#1b1f27}}
+:root[data-theme="dark"] .seg button.on,:root[data-theme="dark"] .icon-btn.on{color:#1b1f27}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]) .seg button.on,:root:not([data-theme="light"]) .icon-btn.on{color:#1b1f27}}
 .mini{display:flex;gap:6px}
+
+/* login-only elements */
+.auth-only{display:none !important}
+body.auth .auth-only{display:inline-flex !important}
+
+/* highlighter dots */
+.hl-tools{gap:8px;align-items:center}
+.dot{width:26px;height:26px;border-radius:50%;border:2px solid var(--line);cursor:pointer;padding:0;background:transparent}
+.dot.y{background:#fde047;border-color:#e8c900}
+.dot.p{background:#f9a8d4;border-color:#ec7fb8}
+.dot.x{border-style:dashed;border-color:var(--sub);
+  background:linear-gradient(135deg,transparent 46%,var(--sub) 47%,var(--sub) 53%,transparent 54%)}
+.dot.on{outline:2px solid var(--accent);outline-offset:2px}
 
 /* ---------- content ---------- */
 main{max-width:1100px;margin:0 auto;padding:18px 14px 60px}
-.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 20px 26px}
+main.wide{max-width:1400px}
+#wrap{--split:50%}
+.card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:22px 20px 26px;container-type:inline-size}
+.divider{display:none}
+.memo{display:none}
+#wrap.split{display:flex;height:calc(100dvh - var(--hh,120px) - 30px)}
+#wrap.split .card{flex:0 0 calc(var(--split) - 8px);overflow:auto;min-width:0}
+#wrap.split .divider{display:flex;flex:0 0 16px;cursor:col-resize;align-items:center;justify-content:center;touch-action:none}
+#wrap.split .divider::before{content:'';width:5px;height:56px;border-radius:5px;background:var(--line)}
+#wrap.split .divider:hover::before,body.dragging .divider::before{background:var(--accent)}
+#wrap.split .memo{display:flex;flex:1 1 0;min-width:0;flex-direction:column;background:var(--paper);border:1px solid var(--line);border-radius:16px;overflow:hidden}
+body.dragging{user-select:none;-webkit-user-select:none;cursor:col-resize}
+.memo-bar{display:flex;gap:6px;padding:8px 10px;border-bottom:1px solid var(--line);align-items:center;flex-wrap:wrap}
+.tb{border:1px solid var(--line);background:var(--btn);border-radius:8px;height:32px;min-width:32px;cursor:pointer;padding:0 8px;font-size:14px}
+.tb.on{background:var(--accent-bg);border-color:var(--accent)}
+.tb.mk{background:#fde047;border-color:#e8c900;color:#25221d}
+.tb.mk.on{outline:2px solid var(--accent);outline-offset:1px}
+.memo-date{font-size:13px;color:var(--sub);margin-left:auto}
+.note-pad{flex:1;overflow:auto;padding:var(--lh) 18px;outline:none;
+  font-family:var(--ko);font-size:var(--fs);line-height:var(--lh);word-break:keep-all;overflow-wrap:break-word;
+  background-image:linear-gradient(to bottom,transparent calc(var(--lh) - 1px),var(--rule) calc(var(--lh) - 1px));
+  background-size:100% var(--lh);background-attachment:local}
+.note-pad div,.note-pad p{margin:0}
+.note-pad:empty::before{content:attr(data-ph);color:var(--sub)}
+
 .notice{font-size:14px;color:var(--sub);background:var(--accent-bg);border-radius:10px;padding:10px 12px;margin-bottom:14px}
 .cols{display:grid;gap:28px}
 .cols.two{grid-template-columns:1fr 1fr}
 @media (max-width:820px){ .cols.two{grid-template-columns:1fr} }
+@container (max-width:700px){ .cols.two{grid-template-columns:1fr} }
 .col-tag{font-size:12px;letter-spacing:.08em;color:var(--accent);font-weight:700;margin-bottom:6px}
 h1{margin:0 0 14px;line-height:1.3;font-weight:600}
 .en h1{font-family:var(--en);font-size:calc(var(--fs) * 1.35);letter-spacing:.02em}
@@ -82,6 +124,12 @@ p b{color:var(--accent);font-weight:600}
 .tnote{margin-top:18px;padding:10px 12px;border-top:1px solid var(--line);font-family:var(--ko-sans);font-size:.8em;line-height:1.6;color:var(--sub)}
 .tnote b{color:var(--accent);margin-right:4px}
 
+/* highlights (visible only when logged in) */
+body.auth .w[data-hl="y"],body.auth .s[data-hl="y"]{background:var(--hl-y)}
+body.auth .w[data-hl="p"],body.auth .s[data-hl="p"]{background:var(--hl-p)}
+body.tool-on #card{user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+body.tool-on #card .w{cursor:pointer}
+
 /* interleaved mode */
 .pair{padding:0 0 16px;margin-bottom:16px;border-bottom:1px dashed var(--line)}
 .pair:last-child{border-bottom:0;margin-bottom:0}
@@ -91,66 +139,204 @@ p b{color:var(--accent);font-weight:600}
 .head-pair .en h1{font-size:calc(var(--fs) * 1.1);color:var(--sub)}
 
 footer{max-width:1100px;margin:0 auto;padding:0 14px 30px;font-size:12px;color:var(--sub);line-height:1.6;text-align:center}
+body.memo-open footer{display:none}
 .toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--bg);
-  border-radius:12px;padding:10px 14px;font-size:14px;display:none;gap:10px;align-items:center;z-index:20;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  border-radius:12px;padding:10px 14px;font-size:14px;display:none;gap:10px;align-items:center;z-index:60;box-shadow:0 6px 20px rgba(0,0,0,.25)}
 .toast button{background:var(--accent);color:#fff;border:0;border-radius:8px;padding:6px 10px;cursor:pointer}
+
+/* ---------- modals ---------- */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.45);display:none;z-index:50;align-items:center;justify-content:center;padding:16px}
+.modal.open{display:flex}
+.sheet{background:var(--paper);color:var(--ink);border-radius:16px;width:100%;max-height:calc(100dvh - 32px);display:flex;flex-direction:column;overflow:hidden;border:1px solid var(--line);box-shadow:0 12px 40px rgba(0,0,0,.3)}
+.sheet-h{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:12px 16px;border-bottom:1px solid var(--line);font-weight:700}
+.x-btn{border:0;background:transparent;font-size:22px;line-height:1;cursor:pointer;color:var(--sub);padding:4px 8px}
+.cal{max-width:1000px}
+.year-grid{overflow:auto;padding:14px;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:16px 14px}
+.mon h3{margin:0 0 6px;font-size:14px;color:var(--accent)}
+.mon h3 span{font-family:var(--en);font-weight:400;color:var(--sub);font-size:13px;margin-left:4px}
+.mon .g{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;text-align:center;font-size:13px}
+.mon .wd{color:var(--sub);font-size:11px;padding-bottom:2px}
+.mon .wd:first-child{color:#c0392b}
+.d{border:0;background:transparent;padding:5px 0;border-radius:8px;cursor:pointer;position:relative;font-variant-numeric:tabular-nums}
+.d:hover{background:var(--accent-bg)}
+.d.sun{color:#c0392b}
+.d.today{box-shadow:inset 0 0 0 1.5px var(--accent);font-weight:700}
+.d.sel{background:var(--accent);color:#fff}
+.d.has::after{content:'';position:absolute;left:50%;bottom:1px;width:4px;height:4px;margin-left:-2px;border-radius:50%;background:var(--accent)}
+.d.sel.has::after{background:#fff}
+.login{max-width:320px}
+.login .body{padding:16px;display:flex;flex-direction:column;gap:10px}
+.login input{width:100%;height:44px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--bg);font-size:18px;letter-spacing:.2em}
+.login .err{color:#c0392b;font-size:13px;min-height:18px}
+.login .btns{display:flex;gap:8px;justify-content:flex-end}
+.login .btns button{height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--btn);cursor:pointer}
+.login .btns .ok{background:var(--accent);border-color:var(--accent);color:#fff}
+.bk{max-width:400px}
+.bk .body{padding:6px 16px 16px;overflow:auto}
+.bk h4{margin:14px 0 6px;font-size:14px;color:var(--accent)}
+.bk .st{font-size:14px;margin:0 0 8px;line-height:1.5}
+.bk .st.err{color:#c0392b}
+.bk .row{display:flex;gap:8px;flex-wrap:wrap}
+.bk .row button{height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--btn);cursor:pointer}
+.bk .row button.ok{background:var(--accent);border-color:var(--accent);color:#fff}
+.bk .row button:disabled{opacity:.5;cursor:default}
+.bk small{display:block;color:var(--sub);font-size:12px;line-height:1.5;margin-top:8px}
+#syncBtn{position:relative}
+#syncBtn::after{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--line)}
+#syncBtn.ok::after{background:#2e9d5b}
+#syncBtn.busy::after{background:#e0a800}
+#syncBtn.err::after{background:#c0392b}
+
 @media (max-width:480px){
-  .seg button{padding:7px 10px}
+  .seg button{padding:7px 9px}
   .card{padding:18px 15px 22px;border-radius:12px}
   main{padding:12px 10px 50px}
   .en p{text-align:left}
+  .icon-btn{padding:0 8px;font-size:14px}
+  #wrap.split .card{padding:14px 12px}
+  .note-pad{padding:var(--lh) 12px}
 }
 </style>
 </head>
 <body>
-<header>
+<header id="hdr">
   <div class="bar">
+    <button class="icon-btn today-btn" id="today">오늘</button>
     <div class="date-nav">
       <button class="icon-btn" id="prev" aria-label="이전 날">‹</button>
-      <label class="date-label" title="날짜 선택">
-        <div class="ko" id="dKo">—</div>
-        <div class="en" id="dEn">—</div>
-        <input type="date" id="picker" aria-label="날짜 선택">
-      </label>
+      <button class="date-label" id="dateBtn" title="연간 달력에서 날짜 선택">
+        <span class="ko" id="dKo">—</span>
+        <span class="en" id="dEn">—</span>
+      </button>
       <button class="icon-btn" id="next" aria-label="다음 날">›</button>
     </div>
-    <button class="icon-btn today-btn" id="today">오늘</button>
+    <button class="icon-btn" id="auth">로그인</button>
+    <button class="icon-btn auth-only" id="memoBtn">메모</button>
   </div>
   <div class="tools">
-    <div class="seg" id="mode">
-      <button data-v="ko">한글</button>
-      <button data-v="en">English</button>
-      <button data-v="both">대조</button>
-      <button data-v="pair">문단</button>
+    <div class="left-tools">
+      <div class="seg" id="mode">
+        <button data-v="ko">한글</button>
+        <button data-v="en">English</button>
+        <button data-v="both">대조</button>
+        <button data-v="pair">문단</button>
+      </div>
+      <div class="hl-tools auth-only" id="hlTools">
+        <button class="dot y" data-t="y" title="형광펜(노랑)" aria-label="노랑 형광펜"></button>
+        <button class="dot p" data-t="p" title="형광펜(분홍)" aria-label="분홍 형광펜"></button>
+        <button class="dot x" data-t="x" title="지우개" aria-label="형광펜 지우개"></button>
+      </div>
     </div>
     <div class="mini">
       <button class="icon-btn" id="fsDown" aria-label="글자 작게">A−</button>
       <button class="icon-btn" id="fsUp" aria-label="글자 크게">A+</button>
       <button class="icon-btn" id="koFont" aria-label="한글 글꼴">명조</button>
       <button class="icon-btn" id="theme" aria-label="테마">자동</button>
+      <button class="icon-btn auth-only" id="syncBtn" title="백업·동기화">백업</button>
     </div>
   </div>
 </header>
 
-<main><div class="card" id="card">불러오는 중…</div></main>
+<main id="main">
+  <div id="wrap">
+    <div class="card" id="card">불러오는 중…</div>
+    <div class="divider" id="divider" aria-label="크기 조절"></div>
+    <section class="memo" id="memo">
+      <div class="memo-bar">
+        <button class="tb" data-cmd="bold" title="굵게"><b>B</b></button>
+        <button class="tb" data-cmd="italic" title="기울임"><i>I</i></button>
+        <button class="tb" data-cmd="underline" title="밑줄"><u>U</u></button>
+        <button class="tb mk" id="mkBtn" title="형광펜 적용/해제">형광펜</button>
+        <span class="memo-date" id="memoDate"></span>
+      </div>
+      <div class="note-pad" id="pad" contenteditable="true" spellcheck="false" data-ph="이 날의 묵상을 적어 보십시오."></div>
+    </section>
+  </div>
+</main>
 <footer>
   Oswald Chambers, <i>My Utmost for His Highest</i> (1927 원문, 퍼블릭 도메인)<br>
   한글: 자체 번역본 by YB Kim<br>
   본문 속 짧은 인용: Chambers 영역본(KJV·R.V.·모펫역) 의역
 </footer>
+
+<div class="modal" id="calModal">
+  <div class="sheet cal">
+    <div class="sheet-h"><span id="calYear">연간 달력</span><button class="x-btn" data-close aria-label="닫기">×</button></div>
+    <div class="year-grid" id="yearGrid"></div>
+  </div>
+</div>
+<div class="modal" id="loginModal">
+  <div class="sheet login">
+    <div class="sheet-h"><span>로그인</span><button class="x-btn" data-close aria-label="닫기">×</button></div>
+    <div class="body">
+      <input type="password" id="pw" inputmode="numeric" autocomplete="current-password" placeholder="비밀번호">
+      <div class="err" id="pwErr"></div>
+      <div class="btns"><button data-close>취소</button><button class="ok" id="pwOk">확인</button></div>
+    </div>
+  </div>
+</div>
+<div class="modal" id="bkModal">
+  <div class="sheet bk">
+    <div class="sheet-h"><span>백업·동기화</span><button class="x-btn" data-close aria-label="닫기">×</button></div>
+    <div class="body">
+      <h4>클라우드 동기화 (Google 계정)</h4>
+      <p class="st" id="cloudSt">연결 안 됨</p>
+      <div class="row">
+        <button class="ok" id="cloudConnect">Google 계정 연결</button>
+        <button id="cloudSync">지금 동기화</button>
+        <button id="cloudOff">연결 해제</button>
+      </div>
+      <small>기기마다 한 번 연결해 두면 메모·형광펜이 바뀔 때마다 자동으로 올라가고, 앱을 열 때마다 다른 기기의 내용을 받아옵니다. 같은 날짜는 더 나중에 고친 내용이 남습니다.</small>
+      <h4>파일 백업</h4>
+      <div class="row">
+        <button id="fileSave">백업 파일 저장</button>
+        <button id="fileLoad">백업 파일 불러오기</button>
+        <input type="file" id="fileIn" accept=".json,application/json" hidden>
+      </div>
+      <p class="st" id="fileSt" style="margin-top:8px"></p>
+      <small>파일을 불러오면 지금 기기의 내용과 합쳐지며, 같은 날짜는 더 나중에 고친 내용이 남습니다.</small>
+    </div>
+  </div>
+</div>
 <div class="toast" id="toast"><span>새 버전이 있습니다</span><button id="reload">새로고침</button></div>
 
 <script>
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
+const PW_HASH='d20ee084367093ef028dff1f2b9b58309c16d87d15249b8daeb8ef24e12ae611';
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem('utmost.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
-             set(k,v){try{localStorage.setItem('utmost.'+k,JSON.stringify(v))}catch(e){}}};
+             set(k,v){try{localStorage.setItem('utmost.'+k,JSON.stringify(v))}catch(e){}},
+             del(k){try{localStorage.removeItem('utmost.'+k)}catch(e){}}};
 let EN=[], KO={}, idx=0;
 let mode=store.get('mode','ko'), fs=store.get('fs',18), theme=store.get('theme','auto'), kofont=store.get('kofont','serif');
+let auth=store.get('auth',false), tool=null, memoOpen=false, split=store.get('split',50);
+let HL=store.get('hl',{}), TS=store.get('ts',{});
+let cloud=null;   // sync.js module once loaded
+/* 날짜별 마지막 수정 시각 기록 → 클라우드로 올림 */
+function markDay(id){ TS[id]=Date.now(); store.set('ts',TS); if(cloud) cloud.push(id); }
+function memoIds(){ const r=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('utmost.memo.')) r.push(k.slice(12)); } }catch(e){} return r; }
+/* sync.js / 파일 백업이 쓰는 로컬 저장소 접근자 */
+window.UT={
+  getDay:id=>({memo:store.get('memo.'+id,''),hl:HL[id]||{},ts:TS[id]||0}),
+  setDay(id,d){
+    if(d.memo) store.set('memo.'+id,d.memo); else store.del('memo.'+id);
+    if(d.hl&&Object.keys(d.hl).length) HL[id]=d.hl; else delete HL[id];
+    TS[id]=d.ts||Date.now(); store.set('hl',HL); store.set('ts',TS);
+  },
+  localIds:()=>[...new Set([...Object.keys(TS),...Object.keys(HL),...memoIds()])],
+  refresh(){
+    if(!EN.length) return;
+    applyHL();
+    if(memoOpen && document.activeElement!==padEl){ memoId=null; loadMemo(); }
+  }
+};
+/* 시각 기록이 없는 기존 데이터에 시각 부여(최초 1회) */
+(function(){ let ch=false; [...Object.keys(HL),...memoIds()].forEach(id=>{ if(!TS[id]){ TS[id]=Date.now(); ch=true; } }); if(ch) store.set('ts',TS); })();
 
 const pad=n=>String(n).padStart(2,'0');
 function todayId(){const d=new Date();return pad(d.getMonth()+1)+'-'+pad(d.getDate());}
 function idToIdx(id){const i=EN.findIndex(e=>e.id===id);return i<0?0:i;}
+const curId=()=>EN[idx]?EN[idx].id:todayId();
 
 function applyPrefs(){
   const r=document.documentElement;
@@ -160,15 +346,17 @@ function applyPrefs(){
   $('koFont').textContent=kofont==='serif'?'명조':'고딕';
   $('theme').textContent={auto:'자동',light:'밝게',dark:'어둡게'}[theme];
   document.querySelectorAll('#mode button').forEach(b=>b.classList.toggle('on',b.dataset.v===mode));
+  measureHeader();
 }
 
+/* ---------- rendering ---------- */
+function noteHTML(e){ return e.note?`<div class="tnote"><b>역주</b> ${e.note}</div>`:''; }
 function verseHTML(e){
   if(!e.verse) return '';
-  return `<div class="verse"><span class="t">${e.verse}</span>${e.ref?`<span class="r">${e.ref}</span>`:''}</div>`;
+  return `<div class="verse"><span class="t" data-sec="v">${e.verse}</span>${e.ref?`<span class="r">${e.ref}</span>`:''}</div>`;
 }
-function noteHTML(e){ return e.note?`<div class="tnote"><b>역주</b> ${e.note}</div>`:''; }
 function block(e,lang){
-  return `<div class="${lang}"><h1>${e.title}</h1>${verseHTML(e)}${e.paras.map(p=>`<p>${p}</p>`).join('')}${noteHTML(e)}</div>`;
+  return `<div class="${lang}"><h1 data-sec="t">${e.title}</h1>${verseHTML(e)}${e.paras.map((p,i)=>`<p data-sec="p${i}">${p}</p>`).join('')}${lang==='ko'?noteHTML(e):''}</div>`;
 }
 const SMALL=new Set(['a','an','and','as','at','but','by','for','in','into','of','on','or','the','to','with','from','than','v.']);
 function titleCase(s){let first=true;return s.toLowerCase().replace(/[A-Za-z.'’]+/g,w=>{const r=(!first&&SMALL.has(w))?w:w.charAt(0).toUpperCase()+w.slice(1);first=false;return r;}).replace(/\bi\b/g,'I');}
@@ -178,73 +366,331 @@ function render(){
   const [m,d]=en.id.split('-').map(Number);
   $('dKo').textContent=`${m}월 ${d}일`;
   $('dEn').textContent=`${MONTHS[m-1]} ${d}`;
-  const y=new Date().getFullYear(); $('picker').value=`${y}-${en.id}`;
   const enD={...en,title:titleCase(en.title)};
   const ko=KO[en.id];
-  let html='';
-  let eff=mode;
-  if(!ko && mode!=='en'){
-    html+=`<div class="notice">이 날짜의 한글 번역은 준비 중입니다. 영문으로 표시합니다.</div>`;
-    eff='en';
-  }
-  if(eff==='en') html+=block(enD,'en');
+  let html='', eff=mode;
+  if(!ko && mode!=='en'){ html+=`<div class="notice">이 날짜의 한글 번역은 준비 중입니다. 영문으로 표시합니다.</div>`; eff='en'; }
+  if(eff==='en'){ html+=block(enD,'en'); if(ko&&ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`; }
   else if(eff==='ko') html+=block(ko,'ko');
   else if(eff==='both'){
     html+=`<div class="cols two"><div><div class="col-tag">KOREAN</div>${block(ko,'ko')}</div><div><div class="col-tag">ENGLISH</div>${block(enD,'en')}</div></div>`;
-  } else { // pair: paragraph by paragraph
-    html+=`<div class="pair head-pair"><div class="ko"><h1>${ko.title}</h1></div><div class="en"><h1>${enD.title}</h1></div></div>`;
+  } else {
+    html+=`<div class="pair head-pair"><div class="ko"><h1 data-sec="t">${ko.title}</h1></div><div class="en"><h1 data-sec="t">${enD.title}</h1></div></div>`;
     html+=`<div class="pair"><div class="ko">${verseHTML(ko)}</div><div class="en">${verseHTML(enD)}</div></div>`;
     en.paras.forEach((p,i)=>{
-      html+=`<div class="pair"><div class="ko"><p>${ko.paras[i]||''}</p></div><div class="en"><p>${p}</p></div></div>`;
+      html+=`<div class="pair"><div class="ko"><p data-sec="p${i}">${ko.paras[i]||''}</p></div><div class="en"><p data-sec="p${i}">${p}</p></div></div>`;
     });
+    if(ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`;
   }
-  if(eff==='pair' && ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`;
-  if(eff==='en' && ko && ko.note) html+=`<div class="ko">${noteHTML(ko)}</div>`;
   $('card').innerHTML=html;
+  wrapWords(); applyHL();
   document.title=`${m}/${d} · ${ko&&mode!=='en'?ko.title:enD.title}`;
 }
 
-function go(i){idx=(i+EN.length)%EN.length;render();window.scrollTo({top:0});
-  history.replaceState(null,'','#'+EN[idx].id);}
+/* split every section into 어절 spans: words in the same 어절 share one key */
+function wrapWords(){
+  $('card').querySelectorAll('[data-sec]').forEach(el=>{
+    const host=el.closest('.ko,.en'); if(!host) return;
+    const lang=host.classList.contains('ko')?'ko':'en', sec=el.dataset.sec;
+    let g=0, started=false;
+    const tw=document.createTreeWalker(el,NodeFilter.SHOW_TEXT), nodes=[];
+    while(tw.nextNode()) nodes.push(tw.currentNode);
+    nodes.forEach(n=>{
+      const parts=n.nodeValue.split(/(\s+)/); const f=document.createDocumentFragment();
+      parts.forEach(p=>{
+        if(!p) return;
+        const s=document.createElement('span');
+        if(/^\s+$/.test(p)){ s.className='s'; if(started) g++; started=false; }
+        else { s.className='w'; s.dataset.k=`${lang}:${sec}:${g}`; started=true; }
+        s.textContent=p; f.appendChild(s);
+      });
+      n.replaceWith(f);
+    });
+  });
+}
+function applyHL(){
+  const m=HL[curId()]||{};
+  $('card').querySelectorAll('.w').forEach(w=>{const c=m[w.dataset.k]; if(c) w.dataset.hl=c; else delete w.dataset.hl;});
+  fillSpaces();
+}
+/* a space is filled when the words on both sides are highlighted */
+function fillSpaces(){
+  $('card').querySelectorAll('[data-sec]').forEach(sec=>{
+    const t=[...sec.querySelectorAll('.w,.s')]; let prev=null; const prevOf=new Map();
+    t.forEach(x=>{ if(x.classList.contains('w')) prev=x; else prevOf.set(x,prev); });
+    let next=null;
+    for(let j=t.length-1;j>=0;j--){
+      const x=t[j];
+      if(x.classList.contains('w')){ next=x; continue; }
+      const a=prevOf.get(x);
+      if(a&&next&&a.dataset.hl&&next.dataset.hl) x.dataset.hl=a.dataset.hl; else delete x.dataset.hl;
+    }
+  });
+}
+let hlTimer=null;
+function saveHL(){ const id=curId(); markDay(id); clearTimeout(hlTimer); hlTimer=setTimeout(()=>store.set('hl',HL),250); }
+function paint(w,act){
+  const id=curId(), k=w.dataset.k, m=HL[id]||(HL[id]={});
+  if(act==='erase') delete m[k]; else m[k]=act;
+  if(!Object.keys(m).length) delete HL[id];
+  $('card').querySelectorAll(`.w[data-k="${k}"]`).forEach(x=>{ if(act==='erase') delete x.dataset.hl; else x.dataset.hl=act; });
+  fillSpaces();
+}
+const actionFor=w=> tool==='x' ? 'erase' : (w.dataset.hl===tool ? 'erase' : tool);
 
-// events
+/* ---------- navigation ---------- */
+function go(i){
+  flushMemo();
+  idx=(i+EN.length)%EN.length; render(); window.scrollTo({top:0}); $('card').scrollTop=0;
+  history.replaceState(null,'','#'+EN[idx].id);
+  if(memoOpen) loadMemo();
+}
 $('prev').onclick=()=>go(idx-1);
 $('next').onclick=()=>go(idx+1);
 $('today').onclick=()=>go(idToIdx(todayId()));
-$('picker').onchange=e=>{const v=e.target.value; if(v) go(idToIdx(v.slice(5)));};
 $('mode').onclick=e=>{const b=e.target.closest('button'); if(!b) return; mode=b.dataset.v; store.set('mode',mode); applyPrefs(); render();};
 $('fsDown').onclick=()=>{fs=Math.max(14,fs-1);store.set('fs',fs);applyPrefs();};
 $('fsUp').onclick=()=>{fs=Math.min(28,fs+1);store.set('fs',fs);applyPrefs();};
 $('koFont').onclick=()=>{kofont=kofont==='serif'?'sans':'serif';store.set('kofont',kofont);applyPrefs();};
 $('theme').onclick=()=>{theme={auto:'light',light:'dark',dark:'auto'}[theme];store.set('theme',theme);applyPrefs();};
-document.addEventListener('keydown',e=>{ if(e.target.tagName==='INPUT') return;
-  if(e.key==='ArrowLeft') go(idx-1); if(e.key==='ArrowRight') go(idx+1); });
-// swipe
+const modalOpen=()=>!!document.querySelector('.modal.open');
+document.addEventListener('keydown',e=>{
+  if(e.key==='Escape' && modalOpen()){ document.querySelectorAll('.modal.open').forEach(m=>m.classList.remove('open')); return; }
+  if(modalOpen() || e.target.tagName==='INPUT' || e.target.isContentEditable) return;
+  if(e.key==='ArrowLeft') go(idx-1); if(e.key==='ArrowRight') go(idx+1);
+});
+/* swipe to change day (off while a highlighter is active or inside the memo) */
 let sx=null,sy=null;
-document.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+document.addEventListener('touchstart',e=>{
+  if(tool || modalOpen() || e.target.closest('#memo,#divider')){sx=null;return;}
+  sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
 document.addEventListener('touchend',e=>{ if(sx===null) return;
   const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
   if(Math.abs(dx)>80 && Math.abs(dx)>Math.abs(dy)*2) go(idx+(dx<0?1:-1)); sx=null;},{passive:true});
-// back to today when the app is reopened on a new day
 let lastDay=todayId();
-document.addEventListener('visibilitychange',()=>{ if(document.visibilityState==='visible' && todayId()!==lastDay){lastDay=todayId(); go(idToIdx(lastDay));} });
+document.addEventListener('visibilitychange',()=>{
+  if(document.visibilityState==='hidden') flushMemo();
+  if(document.visibilityState==='visible' && cloud && auth) cloud.syncAll();
+  if(document.visibilityState==='visible' && todayId()!==lastDay){lastDay=todayId(); go(idToIdx(lastDay));} });
 
-applyPrefs();
+/* ---------- modals ---------- */
+function openModal(id){ $(id).classList.add('open'); }
+function closeModal(id){ $(id).classList.remove('open'); }
+document.querySelectorAll('.modal').forEach(m=>{
+  m.addEventListener('click',e=>{ if(e.target===m || e.target.closest('[data-close]')) m.classList.remove('open'); });
+});
+
+/* yearly calendar */
+function hasData(id){ return !!(HL[id]&&Object.keys(HL[id]).length) || !!store.get('memo.'+id,''); }
+function openCal(){
+  const y=new Date().getFullYear(), cur=curId(), tid=todayId();
+  $('calYear').textContent=`${y}년 연간 달력`;
+  let h='';
+  for(let m=1;m<=12;m++){
+    const first=new Date(y,m-1,1).getDay(), days=m===2?29:new Date(y,m,0).getDate();
+    h+=`<div class="mon" id="mon${m}"><h3>${m}월<span>${MONTHS[m-1]}</span></h3><div class="g">`+
+       ['일','월','화','수','목','금','토'].map(d=>`<span class="wd">${d}</span>`).join('');
+    for(let i=0;i<first;i++) h+='<span></span>';
+    for(let d=1;d<=days;d++){
+      const id=pad(m)+'-'+pad(d), dow=(first+d-1)%7;
+      const cls=['d',dow===0?'sun':'',id===tid?'today':'',id===cur?'sel':'',auth&&hasData(id)?'has':''].join(' ');
+      h+=`<button class="${cls}" data-id="${id}">${d}</button>`;
+    }
+    h+='</div></div>';
+  }
+  $('yearGrid').innerHTML=h; openModal('calModal');
+  const mon=$('mon'+(+cur.slice(0,2))); if(mon) mon.scrollIntoView({block:'center'});
+}
+$('dateBtn').onclick=openCal;
+$('yearGrid').onclick=e=>{ const b=e.target.closest('button.d'); if(!b) return; closeModal('calModal'); go(idToIdx(b.dataset.id)); };
+
+/* ---------- login ---------- */
+async function sha(s){ const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s)); return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join(''); }
+function applyAuth(){
+  document.body.classList.toggle('auth',auth);
+  $('auth').textContent=auth?'로그아웃':'로그인';
+  if(!auth){ setTool(null); setMemo(false); }
+  else if(store.get('cloud',false)) loadCloud();
+  measureHeader();
+}
+$('auth').onclick=()=>{
+  if(auth){ flushMemo(); auth=false; store.set('auth',false); applyAuth(); return; }
+  $('pw').value=''; $('pwErr').textContent=''; openModal('loginModal'); setTimeout(()=>$('pw').focus(),50);
+};
+async function tryLogin(){
+  let ok=false; try{ ok=(await sha($('pw').value))===PW_HASH; }catch(e){ $('pwErr').textContent='이 환경에서는 로그인할 수 없습니다(https 필요).'; return; }
+  if(ok){ auth=true; store.set('auth',true); closeModal('loginModal'); applyAuth(); }
+  else { $('pwErr').textContent='비밀번호가 맞지 않습니다.'; $('pw').select(); }
+}
+$('pwOk').onclick=tryLogin;
+$('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
+
+/* ---------- highlighter ---------- */
+function setTool(t){
+  tool=(t && tool!==t)?t:null;
+  document.querySelectorAll('#hlTools .dot').forEach(d=>d.classList.toggle('on',d.dataset.t===tool));
+  document.body.classList.toggle('tool-on',!!tool);
+}
+$('hlTools').onclick=e=>{ const d=e.target.closest('.dot'); if(d) setTool(d.dataset.t); };
+const card=$('card');
+let painting=null;
+card.addEventListener('mousedown',e=>{
+  if(!tool||!auth||e.button!==0) return; const w=e.target.closest('.w'); if(!w) return;
+  e.preventDefault(); painting=actionFor(w); paint(w,painting);
+});
+card.addEventListener('mouseover',e=>{ if(!painting) return; const w=e.target.closest('.w'); if(w) paint(w,painting); });
+document.addEventListener('mouseup',()=>{ if(painting){ painting=null; saveHL(); } });
+/* touch: tap = one 어절, press-and-hold then drag = paint across */
+let tStart=null,tTimer=null;
+card.addEventListener('touchstart',e=>{
+  if(!tool||!auth) return; const w=e.target.closest('.w'); if(!w) return;
+  const t=e.touches[0]; tStart={x:t.clientX,y:t.clientY,w,moved:false};
+  tTimer=setTimeout(()=>{ painting=actionFor(w); paint(w,painting); if(navigator.vibrate) navigator.vibrate(8); },260);
+},{passive:true});
+document.addEventListener('touchmove',e=>{
+  if(!tStart) return; const t=e.touches[0];
+  if(painting){
+    e.preventDefault();
+    const el=document.elementFromPoint(t.clientX,t.clientY), w=el&&el.closest?el.closest('#card .w'):null;
+    if(w) paint(w,painting); return;
+  }
+  if(Math.hypot(t.clientX-tStart.x,t.clientY-tStart.y)>10){ tStart.moved=true; clearTimeout(tTimer); }
+},{passive:false});
+document.addEventListener('touchend',e=>{
+  if(!tStart) return; clearTimeout(tTimer);
+  if(painting){ painting=null; saveHL(); e.preventDefault(); }
+  else if(!tStart.moved){ paint(tStart.w,actionFor(tStart.w)); saveHL(); e.preventDefault(); }
+  tStart=null;
+},{passive:false});
+
+/* ---------- memo ---------- */
+const padEl=$('pad'); let memoId=null, memoTimer=null;
+function measureHeader(){ document.documentElement.style.setProperty('--hh',$('hdr').offsetHeight+'px'); }
+window.addEventListener('resize',measureHeader);
+function setMemo(open){
+  if(!open) flushMemo();
+  memoOpen=open;
+  $('wrap').classList.toggle('split',open); $('main').classList.toggle('wide',open);
+  document.body.classList.toggle('memo-open',open);
+  $('memoBtn').classList.toggle('on',open);
+  $('wrap').style.setProperty('--split',split+'%');
+  measureHeader();
+  if(open){ loadMemo(); window.scrollTo({top:0}); }
+}
+$('memoBtn').onclick=()=>setMemo(!memoOpen);
+function loadMemo(){
+  memoId=curId(); padEl.innerHTML=store.get('memo.'+memoId,'');
+  const [m,d]=memoId.split('-').map(Number); $('memoDate').textContent=`${m}월 ${d}일 메모`;
+}
+function flushMemo(){
+  if(memoTimer){ clearTimeout(memoTimer); memoTimer=null; }
+  if(!memoId) return;
+  const html=padEl.textContent.trim()?padEl.innerHTML:'', prev=store.get('memo.'+memoId,'');
+  if(html===prev) return;
+  if(html) store.set('memo.'+memoId,html); else store.del('memo.'+memoId);
+  markDay(memoId);
+}
+padEl.addEventListener('input',()=>{ clearTimeout(memoTimer); memoTimer=setTimeout(flushMemo,400); });
+padEl.addEventListener('blur',flushMemo);
+document.querySelectorAll('.memo-bar .tb').forEach(b=>b.addEventListener('mousedown',e=>e.preventDefault()));
+document.querySelectorAll('.memo-bar .tb[data-cmd]').forEach(b=>b.onclick=()=>{
+  padEl.focus(); document.execCommand('styleWithCSS',false,false); document.execCommand(b.dataset.cmd); syncBar(); flushSoon(); });
+function inMark(){
+  const sel=getSelection(); if(!sel.rangeCount) return false;
+  let n=sel.anchorNode; n=n&&n.nodeType===3?n.parentElement:n;
+  while(n && n!==padEl){ const bg=n.style&&n.style.backgroundColor; if(bg && bg!=='transparent' && !/rgba\(0, 0, 0, 0\)/.test(bg)) return true; n=n.parentElement; }
+  return false;
+}
+$('mkBtn').onclick=()=>{
+  padEl.focus(); const on=inMark();
+  document.execCommand('styleWithCSS',false,true);
+  document.execCommand('hiliteColor',false,on?'transparent':'rgba(253, 224, 71, 0.6)');
+  document.execCommand('styleWithCSS',false,false);
+  syncBar(); flushSoon();
+};
+function flushSoon(){ clearTimeout(memoTimer); memoTimer=setTimeout(flushMemo,300); }
+function syncBar(){
+  if(!memoOpen) return;
+  document.querySelectorAll('.memo-bar .tb[data-cmd]').forEach(b=>{ let s=false; try{s=document.queryCommandState(b.dataset.cmd)}catch(e){} b.classList.toggle('on',s); });
+  $('mkBtn').classList.toggle('on',inMark());
+}
+document.addEventListener('selectionchange',()=>{ if(document.activeElement===padEl) syncBar(); });
+/* draggable divider */
+const dv=$('divider'); let dragging=false;
+dv.addEventListener('pointerdown',e=>{ dragging=true; dv.setPointerCapture(e.pointerId); document.body.classList.add('dragging'); });
+dv.addEventListener('pointermove',e=>{
+  if(!dragging) return; const r=$('wrap').getBoundingClientRect();
+  split=Math.max(20,Math.min(80,(e.clientX-r.left)/r.width*100));
+  $('wrap').style.setProperty('--split',split+'%');
+});
+const endDrag=()=>{ if(!dragging) return; dragging=false; store.set('split',Math.round(split)); document.body.classList.remove('dragging'); };
+dv.addEventListener('pointerup',endDrag); dv.addEventListener('pointercancel',endDrag);
+
+/* ---------- backup & sync ---------- */
+function fmtTime(t){ const d=new Date(t); return `${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+function showCloud(st){
+  const b=$('syncBtn'); b.classList.remove('ok','busy','err');
+  if(st.error) b.classList.add('err'); else if(st.busy) b.classList.add('busy'); else if(st.email) b.classList.add('ok');
+  const el=$('cloudSt'); el.classList.toggle('err',!!st.error);
+  el.textContent = st.error ? '오류: '+st.error
+    : st.email ? `${st.email} 연결됨` + (st.busy?' · 동기화 중…':st.last?` · 마지막 동기화 ${fmtTime(st.last)}`:'')
+    : (st.ready||!cloud) ? '연결 안 됨' : '확인 중…';
+  $('cloudConnect').hidden=!!st.email; $('cloudSync').hidden=!st.email; $('cloudOff').hidden=!st.email;
+  $('cloudSync').disabled=!!st.busy;
+}
+showCloud({});
+let cloudLoading=null;
+function loadCloud(){
+  if(cloud) return Promise.resolve(cloud);
+  if(!cloudLoading) cloudLoading=import('./sync.js').then(m=>{ cloud=m; m.onState(showCloud); return m; })
+    .catch(e=>{ cloudLoading=null; showCloud({error:'동기화 모듈을 불러오지 못했습니다(네트워크 확인).'}); throw e; });
+  return cloudLoading;
+}
+$('syncBtn').onclick=()=>{ $('fileSt').textContent=''; openModal('bkModal'); };
+$('cloudConnect').onclick=async()=>{ store.set('cloud',true); const m=await loadCloud(); m.connect(); };
+$('cloudSync').onclick=()=>{ flushMemo(); cloud&&cloud.syncAll(); };
+$('cloudOff').onclick=async()=>{ if(!cloud) return; await cloud.disconnect(); store.set('cloud',false); };
+$('fileSave').onclick=()=>{
+  flushMemo();
+  const days={}; UT.localIds().forEach(id=>{ const d=UT.getDay(id); if(d.memo||Object.keys(d.hl).length||d.ts) days[id]=d; });
+  const data={app:'utmost',version:1,exportedAt:new Date().toISOString(),days};
+  const n=new Date(), name=`YB_C_Utmost_backup_${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}.json`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
+  a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
+  $('fileSt').textContent=`${Object.keys(days).length}일분을 ${name}(으)로 저장했습니다.`;
+};
+$('fileLoad').onclick=()=>{ $('fileIn').value=''; $('fileIn').click(); };
+$('fileIn').onchange=async e=>{
+  const f=e.target.files[0]; if(!f) return;
+  try{
+    const data=JSON.parse(await f.text());
+    if(data.app!=='utmost'||!data.days) throw new Error('형식');
+    flushMemo(); let n=0;
+    Object.entries(data.days).forEach(([id,d])=>{
+      if(!/^\d\d-\d\d$/.test(id)) return;
+      if((d.ts||0)>(TS[id]||0)){ UT.setDay(id,{memo:d.memo||'',hl:d.hl||{},ts:d.ts||Date.now()}); if(cloud) cloud.push(id); n++; }
+    });
+    UT.refresh();
+    $('fileSt').textContent=`불러오기 완료: ${n}일분 반영 (이미 더 최신인 날짜는 유지).`;
+  }catch(err){ $('fileSt').textContent='Utmost 백업 파일이 아니거나 읽을 수 없습니다.'; }
+};
+
+/* ---------- boot ---------- */
+applyPrefs(); applyAuth();
 Promise.all([fetch('data/en.json').then(r=>r.json()), fetch('data/ko.json').then(r=>r.json()).catch(()=>({}))])
  .then(([en,ko])=>{EN=en;KO=ko;
    const h=location.hash.slice(1); idx=idToIdx(/^\d\d-\d\d$/.test(h)?h:todayId()); render();})
  .catch(()=>{$('card').textContent='데이터를 불러오지 못했습니다. 네트워크 연결을 확인해 주십시오.';});
 
-// service worker + update prompt
 if('serviceWorker' in navigator && location.protocol!=='file:'){
   navigator.serviceWorker.register('sw.js').then(reg=>{
-    const show=w=>{ $('toast').style.display='flex'; $('reload').onclick=()=>w.postMessage('skipWaiting'); };
+    const show=w=>{ $('toast').style.display='flex'; $('reload').onclick=()=>{ flushMemo(); w.postMessage('skipWaiting'); }; };
     if(reg.waiting && navigator.serviceWorker.controller) show(reg.waiting);
     reg.addEventListener('updatefound',()=>{ const w=reg.installing;
       w.addEventListener('statechange',()=>{ if(w.state==='installed' && navigator.serviceWorker.controller) show(w); }); });
     setInterval(()=>reg.update(),60*60*1000);
   });
-  let reloaded=false; const hadCtrl=!!navigator.serviceWorker.controller;  // first install: no reload
+  let reloaded=false; const hadCtrl=!!navigator.serviceWorker.controller;
   navigator.serviceWorker.addEventListener('controllerchange',()=>{ if(hadCtrl && !reloaded){reloaded=true;location.reload();} });
 }
 </script>
