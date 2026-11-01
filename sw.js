@@ -1,5 +1,5 @@
 // Utmost service worker — VERSION is bumped by deploy.ps1 on every deploy.
-const VERSION = '20261101-175257';
+const VERSION = '20261101-224120';
 const SHELL = 'utmost-shell-' + VERSION;
 const FONTS = 'utmost-fonts-v1';
 const ASSETS = ['./', './index.html', './manifest.json', './icon-192.png', './icon-512.png', './data/en.json', './data/ko.json'];

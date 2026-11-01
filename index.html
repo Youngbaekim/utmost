@@ -171,21 +171,13 @@ body.memo-open footer{display:none}
 .login .btns{display:flex;gap:8px;justify-content:flex-end}
 .login .btns button{height:38px;padding:0 16px;border-radius:10px;border:1px solid var(--line);background:var(--btn);cursor:pointer}
 .login .btns .ok{background:var(--accent);border-color:var(--accent);color:#fff}
-.bk{max-width:400px}
-.bk .body{padding:6px 16px 16px;overflow:auto}
-.bk h4{margin:14px 0 6px;font-size:14px;color:var(--accent)}
-.bk .st{font-size:14px;margin:0 0 8px;line-height:1.5}
-.bk .st.err{color:#c0392b}
-.bk .row{display:flex;gap:8px;flex-wrap:wrap}
-.bk .row button{height:38px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--btn);cursor:pointer}
-.bk .row button.ok{background:var(--accent);border-color:var(--accent);color:#fff}
-.bk .row button:disabled{opacity:.5;cursor:default}
-.bk small{display:block;color:var(--sub);font-size:12px;line-height:1.5;margin-top:8px}
-#syncBtn{position:relative}
-#syncBtn::after{content:'';position:absolute;top:5px;right:5px;width:7px;height:7px;border-radius:50%;background:var(--line)}
-#syncBtn.ok::after{background:#2e9d5b}
-#syncBtn.busy::after{background:#e0a800}
-#syncBtn.err::after{background:#c0392b}
+.sync-st{font-size:12px;color:var(--sub);white-space:nowrap}
+.sync-st.err{color:#c0392b}
+#memoBtn{position:relative}
+#memoBtn::after{content:'';position:absolute;top:4px;right:4px;width:7px;height:7px;border-radius:50%;background:transparent}
+#memoBtn.ok::after{background:#2e9d5b}
+#memoBtn.busy::after{background:#e0a800}
+#memoBtn.err::after{background:#c0392b}
 
 @media (max-width:480px){
   .seg button{padding:7px 9px}
@@ -232,7 +224,6 @@ body.memo-open footer{display:none}
       <button class="icon-btn" id="fsUp" aria-label="글자 크게">A+</button>
       <button class="icon-btn" id="koFont" aria-label="한글 글꼴">명조</button>
       <button class="icon-btn" id="theme" aria-label="테마">자동</button>
-      <button class="icon-btn auth-only" id="syncBtn" title="백업·동기화">백업</button>
     </div>
   </div>
 </header>
@@ -248,6 +239,7 @@ body.memo-open footer{display:none}
         <button class="tb" data-cmd="underline" title="밑줄"><u>U</u></button>
         <button class="tb mk" id="mkBtn" title="형광펜 적용/해제">형광펜</button>
         <span class="memo-date" id="memoDate"></span>
+        <span class="sync-st" id="syncSt"></span>
       </div>
       <div class="note-pad" id="pad" contenteditable="true" spellcheck="false" data-ph="이 날의 묵상을 적어 보십시오."></div>
     </section>
@@ -275,29 +267,6 @@ body.memo-open footer{display:none}
     </div>
   </div>
 </div>
-<div class="modal" id="bkModal">
-  <div class="sheet bk">
-    <div class="sheet-h"><span>백업·동기화</span><button class="x-btn" data-close aria-label="닫기">×</button></div>
-    <div class="body">
-      <h4>클라우드 동기화 (Google 계정)</h4>
-      <p class="st" id="cloudSt">연결 안 됨</p>
-      <div class="row">
-        <button class="ok" id="cloudConnect">Google 계정 연결</button>
-        <button id="cloudSync">지금 동기화</button>
-        <button id="cloudOff">연결 해제</button>
-      </div>
-      <small>기기마다 한 번 연결해 두면 메모·형광펜이 바뀔 때마다 자동으로 올라가고, 앱을 열 때마다 다른 기기의 내용을 받아옵니다. 같은 날짜는 더 나중에 고친 내용이 남습니다.</small>
-      <h4>파일 백업</h4>
-      <div class="row">
-        <button id="fileSave">백업 파일 저장</button>
-        <button id="fileLoad">백업 파일 불러오기</button>
-        <input type="file" id="fileIn" accept=".json,application/json" hidden>
-      </div>
-      <p class="st" id="fileSt" style="margin-top:8px"></p>
-      <small>파일을 불러오면 지금 기기의 내용과 합쳐지며, 같은 날짜는 더 나중에 고친 내용이 남습니다.</small>
-    </div>
-  </div>
-</div>
 <div class="toast" id="toast"><span>새 버전이 있습니다</span><button id="reload">새로고침</button></div>
 
 <script>
@@ -310,28 +279,33 @@ const store={get(k,d){try{const v=localStorage.getItem('utmost.'+k);return v===n
 let EN=[], KO={}, idx=0;
 let mode=store.get('mode','ko'), fs=store.get('fs',18), theme=store.get('theme','auto'), kofont=store.get('kofont','serif');
 let auth=store.get('auth',false), tool=null, memoOpen=false, split=store.get('split',50);
-let HL=store.get('hl',{}), TS=store.get('ts',{});
-let cloud=null;   // sync.js module once loaded
-/* 날짜별 마지막 수정 시각 기록 → 클라우드로 올림 */
-function markDay(id){ TS[id]=Date.now(); store.set('ts',TS); if(cloud) cloud.push(id); }
+let HL=store.get('hl',{}), MT=store.get('mt',{}), MB=store.get('mb',{}), PEND=store.get('pend',[]);
+let cloud=null;   // sync.js (자동 동기화) — 로그인 상태에서 불러옴
+/* 이전 형식 형광펜("y") → {c,t} 로 변환(최초 1회) */
+(function(){ const ts=store.get('ts',{}); let ch=false;
+  Object.entries(HL).forEach(([id,m])=>Object.keys(m).forEach(k=>{ if(typeof m[k]!=='object'){ m[k]={c:m[k],t:ts[id]||Date.now()}; ch=true; } }));
+  if(ch) store.set('hl',HL);
+  memoIds().forEach(id=>{ if(!MT[id]){ MT[id]=ts[id]||Date.now(); ch=true; } }); if(ch) store.set('mt',MT);
+})();
 function memoIds(){ const r=[]; try{ for(let i=0;i<localStorage.length;i++){ const k=localStorage.key(i); if(k&&k.startsWith('utmost.memo.')) r.push(k.slice(12)); } }catch(e){} return r; }
-/* sync.js / 파일 백업이 쓰는 로컬 저장소 접근자 */
+function changed(id){ if(cloud) cloud.push(id); else if(!PEND.includes(id)){ PEND.push(id); store.set('pend',PEND); } }
+/* sync.js 가 쓰는 로컬 저장소 접근자 */
 window.UT={
-  getDay:id=>({memo:store.get('memo.'+id,''),hl:HL[id]||{},ts:TS[id]||0}),
-  setDay(id,d){
-    if(d.memo) store.set('memo.'+id,d.memo); else store.del('memo.'+id);
-    if(d.hl&&Object.keys(d.hl).length) HL[id]=d.hl; else delete HL[id];
-    TS[id]=d.ts||Date.now(); store.set('hl',HL); store.set('ts',TS);
-  },
-  localIds:()=>[...new Set([...Object.keys(TS),...Object.keys(HL),...memoIds()])],
-  refresh(){
+  getDay:id=>({memo:store.get('memo.'+id,''),memoTs:MT[id]||0,base:MB[id]||0,hl:{...(HL[id]||{})}}),
+  setMemo(id,html,t){ if(html) store.set('memo.'+id,html); else store.del('memo.'+id); MT[id]=t; store.set('mt',MT); },
+  setBase(id,t){ MB[id]=t; store.set('mb',MB); },
+  setHL(id,m){ HL[id]=m; store.set('hl',HL); },
+  flushMemo:()=>flushMemo(),
+  localIds:()=>[...new Set([...Object.keys(HL),...Object.keys(MT),...memoIds()])],
+  addPending(id){ if(!PEND.includes(id)){ PEND.push(id); store.set('pend',PEND); } },
+  clearPending(id){ PEND=PEND.filter(x=>x!==id); store.set('pend',PEND); },
+  pendingIds:()=>[...PEND],
+  refresh(id){
     if(!EN.length) return;
-    applyHL();
-    if(memoOpen && document.activeElement!==padEl){ memoId=null; loadMemo(); }
+    if(!id||id===curId()) applyHL();
+    if(memoOpen && (!id||id===memoId)){ const html=store.get('memo.'+memoId,''); if(padEl.innerHTML!==html) padEl.innerHTML=html; }
   }
 };
-/* 시각 기록이 없는 기존 데이터에 시각 부여(최초 1회) */
-(function(){ let ch=false; [...Object.keys(HL),...memoIds()].forEach(id=>{ if(!TS[id]){ TS[id]=Date.now(); ch=true; } }); if(ch) store.set('ts',TS); })();
 
 const pad=n=>String(n).padStart(2,'0');
 function todayId(){const d=new Date();return pad(d.getMonth()+1)+'-'+pad(d.getDate());}
@@ -410,7 +384,7 @@ function wrapWords(){
 }
 function applyHL(){
   const m=HL[curId()]||{};
-  $('card').querySelectorAll('.w').forEach(w=>{const c=m[w.dataset.k]; if(c) w.dataset.hl=c; else delete w.dataset.hl;});
+  $('card').querySelectorAll('.w').forEach(w=>{const e=m[w.dataset.k], c=e&&e.c; if(c) w.dataset.hl=c; else delete w.dataset.hl;});
   fillSpaces();
 }
 /* a space is filled when the words on both sides are highlighted */
@@ -428,11 +402,10 @@ function fillSpaces(){
   });
 }
 let hlTimer=null;
-function saveHL(){ const id=curId(); markDay(id); clearTimeout(hlTimer); hlTimer=setTimeout(()=>store.set('hl',HL),250); }
+function saveHL(){ store.set('hl',HL); changed(curId()); }
 function paint(w,act){
   const id=curId(), k=w.dataset.k, m=HL[id]||(HL[id]={});
-  if(act==='erase') delete m[k]; else m[k]=act;
-  if(!Object.keys(m).length) delete HL[id];
+  m[k]={c:act==='erase'?null:act,t:Date.now()};
   $('card').querySelectorAll(`.w[data-k="${k}"]`).forEach(x=>{ if(act==='erase') delete x.dataset.hl; else x.dataset.hl=act; });
   fillSpaces();
 }
@@ -470,7 +443,7 @@ document.addEventListener('touchend',e=>{ if(sx===null) return;
 let lastDay=todayId();
 document.addEventListener('visibilitychange',()=>{
   if(document.visibilityState==='hidden') flushMemo();
-  if(document.visibilityState==='visible' && cloud && auth) cloud.syncAll();
+  if(document.visibilityState==='visible' && cloud && auth) cloud.flushPending();
   if(document.visibilityState==='visible' && todayId()!==lastDay){lastDay=todayId(); go(idToIdx(lastDay));} });
 
 /* ---------- modals ---------- */
@@ -481,7 +454,7 @@ document.querySelectorAll('.modal').forEach(m=>{
 });
 
 /* yearly calendar */
-function hasData(id){ return !!(HL[id]&&Object.keys(HL[id]).length) || !!store.get('memo.'+id,''); }
+function hasData(id){ return Object.values(HL[id]||{}).some(e=>e&&e.c) || !!store.get('memo.'+id,''); }
 function openCal(){
   const y=new Date().getFullYear(), cur=curId(), tid=todayId();
   $('calYear').textContent=`${y}년 연간 달력`;
@@ -510,11 +483,11 @@ function applyAuth(){
   document.body.classList.toggle('auth',auth);
   $('auth').textContent=auth?'로그아웃':'로그인';
   if(!auth){ setTool(null); setMemo(false); }
-  else if(store.get('cloud',false)) loadCloud();
+  else loadCloud();
   measureHeader();
 }
 $('auth').onclick=()=>{
-  if(auth){ flushMemo(); auth=false; store.set('auth',false); applyAuth(); return; }
+  if(auth){ flushMemo(); auth=false; store.set('auth',false); applyAuth(); if(cloud) cloud.disconnect(); return; }
   $('pw').value=''; $('pwErr').textContent=''; openModal('loginModal'); setTimeout(()=>$('pw').focus(),50);
 };
 async function tryLogin(){
@@ -577,7 +550,10 @@ function setMemo(open){
   measureHeader();
   if(open){ loadMemo(); window.scrollTo({top:0}); }
 }
-$('memoBtn').onclick=()=>setMemo(!memoOpen);
+$('memoBtn').onclick=()=>{
+  const open=!memoOpen; setMemo(open);
+  if(open){ if(cloud) cloud.connect(); else loadCloud().then(m=>m.connect()); }   // 처음 한 번 Google 로그인
+};
 function loadMemo(){
   memoId=curId(); padEl.innerHTML=store.get('memo.'+memoId,'');
   const [m,d]=memoId.split('-').map(Number); $('memoDate').textContent=`${m}월 ${d}일 메모`;
@@ -587,8 +563,7 @@ function flushMemo(){
   if(!memoId) return;
   const html=padEl.textContent.trim()?padEl.innerHTML:'', prev=store.get('memo.'+memoId,'');
   if(html===prev) return;
-  if(html) store.set('memo.'+memoId,html); else store.del('memo.'+memoId);
-  markDay(memoId);
+  UT.setMemo(memoId,html,Date.now()); changed(memoId);
 }
 padEl.addEventListener('input',()=>{ clearTimeout(memoTimer); memoTimer=setTimeout(flushMemo,400); });
 padEl.addEventListener('blur',flushMemo);
@@ -626,54 +601,25 @@ dv.addEventListener('pointermove',e=>{
 const endDrag=()=>{ if(!dragging) return; dragging=false; store.set('split',Math.round(split)); document.body.classList.remove('dragging'); };
 dv.addEventListener('pointerup',endDrag); dv.addEventListener('pointercancel',endDrag);
 
-/* ---------- backup & sync ---------- */
-function fmtTime(t){ const d=new Date(t); return `${d.getMonth()+1}/${d.getDate()} ${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+/* ---------- 자동 동기화 상태 ---------- */
+function fmtTime(t){ const d=new Date(t); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
 function showCloud(st){
-  const b=$('syncBtn'); b.classList.remove('ok','busy','err');
-  if(st.error) b.classList.add('err'); else if(st.busy) b.classList.add('busy'); else if(st.email) b.classList.add('ok');
-  const el=$('cloudSt'); el.classList.toggle('err',!!st.error);
-  el.textContent = st.error ? '오류: '+st.error
-    : st.email ? `${st.email} 연결됨` + (st.busy?' · 동기화 중…':st.last?` · 마지막 동기화 ${fmtTime(st.last)}`:'')
-    : (st.ready||!cloud) ? '연결 안 됨' : '확인 중…';
-  $('cloudConnect').hidden=!!st.email; $('cloudSync').hidden=!st.email; $('cloudOff').hidden=!st.email;
-  $('cloudSync').disabled=!!st.busy;
+  const b=$('memoBtn'); b.classList.remove('ok','busy','err');
+  const el=$('syncSt'); el.classList.toggle('err',!!st.error);
+  if(st.error){ b.classList.add('err'); el.textContent='⚠ '+st.error; el.title=''; }
+  else if(st.email){ b.classList.add(st.busy?'busy':'ok'); el.textContent=st.busy?'동기화 중…':'동기화됨'+(st.last?' '+fmtTime(st.last):''); el.title=st.email; }
+  else if(st.connecting){ el.textContent='Google 로그인 중…'; }
+  else { el.textContent=st.ready?'이 기기에만 저장 중':''; }
+  b.title=st.email?`메모 · ${st.email} 동기화`:'메모';
 }
-showCloud({});
 let cloudLoading=null;
 function loadCloud(){
   if(cloud) return Promise.resolve(cloud);
   if(!cloudLoading) cloudLoading=import('./sync.js').then(m=>{ cloud=m; m.onState(showCloud); return m; })
-    .catch(e=>{ cloudLoading=null; showCloud({error:'동기화 모듈을 불러오지 못했습니다(네트워크 확인).'}); throw e; });
+    .catch(e=>{ cloudLoading=null; showCloud({error:'동기화 기능을 불러오지 못했습니다(네트워크 확인).'}); throw e; });
   return cloudLoading;
 }
-$('syncBtn').onclick=()=>{ $('fileSt').textContent=''; openModal('bkModal'); };
-$('cloudConnect').onclick=async()=>{ store.set('cloud',true); const m=await loadCloud(); m.connect(); };
-$('cloudSync').onclick=()=>{ flushMemo(); cloud&&cloud.syncAll(); };
-$('cloudOff').onclick=async()=>{ if(!cloud) return; await cloud.disconnect(); store.set('cloud',false); };
-$('fileSave').onclick=()=>{
-  flushMemo();
-  const days={}; UT.localIds().forEach(id=>{ const d=UT.getDay(id); if(d.memo||Object.keys(d.hl).length||d.ts) days[id]=d; });
-  const data={app:'utmost',version:1,exportedAt:new Date().toISOString(),days};
-  const n=new Date(), name=`YB_C_Utmost_backup_${n.getFullYear()}${pad(n.getMonth()+1)}${pad(n.getDate())}.json`;
-  const a=document.createElement('a'); a.href=URL.createObjectURL(new Blob([JSON.stringify(data)],{type:'application/json'}));
-  a.download=name; document.body.appendChild(a); a.click(); setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove();},1000);
-  $('fileSt').textContent=`${Object.keys(days).length}일분을 ${name}(으)로 저장했습니다.`;
-};
-$('fileLoad').onclick=()=>{ $('fileIn').value=''; $('fileIn').click(); };
-$('fileIn').onchange=async e=>{
-  const f=e.target.files[0]; if(!f) return;
-  try{
-    const data=JSON.parse(await f.text());
-    if(data.app!=='utmost'||!data.days) throw new Error('형식');
-    flushMemo(); let n=0;
-    Object.entries(data.days).forEach(([id,d])=>{
-      if(!/^\d\d-\d\d$/.test(id)) return;
-      if((d.ts||0)>(TS[id]||0)){ UT.setDay(id,{memo:d.memo||'',hl:d.hl||{},ts:d.ts||Date.now()}); if(cloud) cloud.push(id); n++; }
-    });
-    UT.refresh();
-    $('fileSt').textContent=`불러오기 완료: ${n}일분 반영 (이미 더 최신인 날짜는 유지).`;
-  }catch(err){ $('fileSt').textContent='Utmost 백업 파일이 아니거나 읽을 수 없습니다.'; }
-};
+$('syncSt').onclick=()=>{ if(cloud&&!cloud.isOn()) cloud.connect(); };
 
 /* ---------- boot ---------- */
 applyPrefs(); applyAuth();
