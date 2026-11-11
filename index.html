@@ -308,21 +308,11 @@ body.memo-open footer{display:none}
     <div class="year-grid" id="yearGrid"></div>
   </div>
 </div>
-<div class="modal" id="loginModal">
-  <div class="sheet login">
-    <div class="sheet-h"><span>로그인</span><button class="x-btn" data-close aria-label="닫기">×</button></div>
-    <div class="body">
-      <input type="password" id="pw" inputmode="numeric" autocomplete="current-password" placeholder="비밀번호">
-      <div class="err" id="pwErr"></div>
-      <div class="btns"><button data-close>취소</button><button class="ok" id="pwOk">확인</button></div>
-    </div>
-  </div>
-</div>
+<div class="toast" id="msg"><span id="msgText"></span></div>
 <div class="toast" id="toast"><span>새 버전이 있습니다</span><button id="reload">새로고침</button></div>
 
 <script>
 const MONTHS=['January','February','March','April','May','June','July','August','September','October','November','December'];
-const PW_HASH='d20ee084367093ef028dff1f2b9b58309c16d87d15249b8daeb8ef24e12ae611';
 const $=id=>document.getElementById(id);
 const store={get(k,d){try{const v=localStorage.getItem('utmost.'+k);return v===null?d:JSON.parse(v)}catch(e){return d}},
              set(k,v){try{localStorage.setItem('utmost.'+k,JSON.stringify(v))}catch(e){}},
@@ -538,22 +528,6 @@ $('dateBtn').onclick=openCal;
 $('yearGrid').onclick=e=>{ const b=e.target.closest('button.d'); if(!b) return; closeModal('calModal'); go(idToIdx(b.dataset.id)); };
 
 /* ---------- login ---------- */
-/* synchronous SHA-256 (the Google pop-up must open inside the same click) */
-function sha256(str){
-  const K=[],H=[];let n=2,c=0;
-  const isP=x=>{for(let i=2;i*i<=x;i++)if(x%i===0)return false;return true;};
-  while(c<64){if(isP(n)){if(c<8)H[c]=(Math.pow(n,1/2)*4294967296)|0;K[c++]=(Math.pow(n,1/3)*4294967296)|0;}n++;}
-  const b=[...new TextEncoder().encode(str)],l=b.length*8;b.push(0x80);while(b.length%64!==56)b.push(0);
-  for(let i=7;i>=0;i--)b.push(i>3?0:(l>>>(i*8))&255);
-  const r=(x,y)=>(x>>>y)|(x<<(32-y));let h=H.slice();
-  for(let o=0;o<b.length;o+=64){const w=[];for(let i=0;i<16;i++)w[i]=(b[o+i*4]<<24)|(b[o+i*4+1]<<16)|(b[o+i*4+2]<<8)|b[o+i*4+3];
-    for(let i=16;i<64;i++){const s0=r(w[i-15],7)^r(w[i-15],18)^(w[i-15]>>>3),s1=r(w[i-2],17)^r(w[i-2],19)^(w[i-2]>>>10);w[i]=(w[i-16]+s0+w[i-7]+s1)|0;}
-    let [a,bb,cc,d,e,f,g,hh]=h;
-    for(let i=0;i<64;i++){const t1=(hh+(r(e,6)^r(e,11)^r(e,25))+((e&f)^(~e&g))+K[i]+w[i])|0,t2=((r(a,2)^r(a,13)^r(a,22))+((a&bb)^(a&cc)^(bb&cc)))|0;
-      hh=g;g=f;f=e;e=(d+t1)|0;d=cc;cc=bb;bb=a;a=(t1+t2)|0;}
-    h=[a,bb,cc,d,e,f,g,hh].map((v,i)=>(v+h[i])|0);}
-  return h.map(v=>(v>>>0).toString(16).padStart(8,'0')).join('');
-}
 function applyAuth(){
   document.body.classList.toggle('auth',auth);
   $('auth').innerHTML=auth?'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg>':'<svg viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4"/><path d="M10 17l5-5-5-5"/><path d="M15 12H3"/></svg>';
@@ -563,22 +537,22 @@ function applyAuth(){
 }
 $('auth').onclick=()=>{
   if(auth){ flushMemo(); auth=false; store.set('auth',false); applyAuth(); if(cloud) cloud.disconnect(); return; }
-  loadCloud();
-  $('pw').value=''; $('pwErr').textContent=''; openModal('loginModal'); setTimeout(()=>$('pw').focus(),50);
+  if(cloud) startLogin();                                   // 클릭 즉시 Google 로그인 창
+  else { showMsg('잠시만 기다려 주십시오…'); loadCloud().then(startLogin).catch(()=>showMsg('네트워크 연결을 확인해 주십시오.',3000)); }
 };
-function tryLogin(){
-  if(sha256($('pw').value)!==PW_HASH){ $('pwErr').textContent='비밀번호가 맞지 않습니다.'; $('pw').select(); return; }
-  if(!cloud){ $('pwErr').textContent='준비 중입니다. 잠시 후 다시 눌러 주십시오.'; loadCloud(); return; }
-  $('pwErr').textContent='Google 계정을 확인하고 있습니다…';
+let msgTimer=null;
+function showMsg(t,ms){ $('msgText').textContent=t; $('msg').style.display='flex'; clearTimeout(msgTimer); if(ms) msgTimer=setTimeout(()=>$('msg').style.display='none',ms); }
+function hideMsg(){ clearTimeout(msgTimer); $('msg').style.display='none'; }
+function startLogin(){
+  showMsg('Google 계정을 확인하고 있습니다…');
   cloud.login().then(r=>{
-    if(r.ok) finishLogin();
-    else if(r.redirect) $('pwErr').textContent='Google 로그인 페이지로 이동합니다…';
-    else $('pwErr').textContent=r.error||'Google 로그인이 취소되었습니다.';
+    if(r.ok){ hideMsg(); finishLogin(); }
+    else if(r.redirect) showMsg('Google 로그인 페이지로 이동합니다…');
+    else if(r.error) showMsg(r.error,5000);
+    else hideMsg();                                        // 사용자가 창을 닫음
   });
 }
-function finishLogin(){ store.del('redirectLogin'); auth=true; store.set('auth',true); closeModal('loginModal'); applyAuth(); }
-$('pwOk').onclick=tryLogin;
-$('pw').addEventListener('keydown',e=>{ if(e.key==='Enter') tryLogin(); });
+function finishLogin(){ store.del('redirectLogin'); auth=true; store.set('auth',true); applyAuth(); }
 
 /* ---------- highlighter ---------- */
 function setTool(t){
